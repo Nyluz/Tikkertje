@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3456813677839112623}
   - component: {fileID: 2339094420618282848}
   - component: {fileID: 7106322464954160636}
+  - component: {fileID: 7512684057096431707}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -93,6 +94,11 @@ MonoBehaviour:
   CinemachineCameraTarget: {fileID: 1661833905999394468}
   TopClamp: 89
   BottomClamp: -89
+  cameraRoot: {fileID: 7860981396008009669}
+  head: {fileID: 6521989751132528559}
+  currentVelocity_x: 0
+  currentVelocity_y: 0
+  _animationBlendSpeed: 0
 --- !u!114 &3456813677839112623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,6 +233,24 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &7512684057096431707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441569583515794488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21c1249d202bd9f418ac24934f308811, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitTarget
+  characterController: {fileID: 1846422590209586727}
+  slapForce: 0
+  velocityMultiplier: 10
+  crosshairTexture: {fileID: 6192944022281365145, guid: f6666b52739c1c24c84d0db60811a6fc, type: 3}
+  player_camera: {fileID: 0}
+  velocity: 0
 --- !u!1 &1661833905999394468
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,8 +275,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1661833905999394468}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.649, z: 0.058}
+  m_LocalRotation: {x: -0, y: 1.1357581e-13, z: 7.7712224e-16, w: 1}
+  m_LocalPosition: {x: 0, y: 1.6457143, z: 0.058}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -403,6 +427,7 @@ MonoBehaviour:
   slapForce: 0
   velocityMultiplier: 10
   crosshairTexture: {fileID: 6192944022281365145, guid: f6666b52739c1c24c84d0db60811a6fc, type: 3}
+  player_camera: {fileID: 0}
   velocity: 0
 --- !u!4 &4184690508858151516 stripped
 Transform:
@@ -469,5 +494,10 @@ PrefabInstance:
 --- !u!4 &1860242218994345858 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5466950663802427914, guid: 2af16fb3fe5cba74fa23857239fdedf4, type: 3}
+  m_PrefabInstance: {fileID: 5912780840283159944}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6521989751132528559 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 616053923273122343, guid: 2af16fb3fe5cba74fa23857239fdedf4, type: 3}
   m_PrefabInstance: {fileID: 5912780840283159944}
   m_PrefabAsset: {fileID: 0}

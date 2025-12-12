@@ -15,7 +15,8 @@ public class HitTarget : MonoBehaviour
     [SerializeField]
     private Texture2D crosshairTexture;
 
-    private Camera m_camera;
+    [SerializeField]
+    private Camera player_camera;
 
     [Header("Status")]
     [SerializeField]
@@ -32,8 +33,8 @@ public class HitTarget : MonoBehaviour
 
     void Awake()
     {
-        m_camera = GetComponent<Camera>();
-        characterController = transform.parent.parent.GetComponent<CharacterController>();
+        player_camera = GetComponentInChildren<Camera>();
+        characterController = GetComponent<CharacterController>();
     }
 
     void Update()
@@ -43,14 +44,14 @@ public class HitTarget : MonoBehaviour
 
         if (Mouse.current.leftButton.isPressed)
         {
-            Ray ray = new Ray(m_camera.transform.position, m_camera.transform.forward);
+            Ray ray = new Ray(player_camera.transform.position, player_camera.transform.forward);
 
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
                 Ragdoll ragdoll = hitInfo.collider.GetComponentInParent<Ragdoll>();
                 if (ragdoll != null)
                 {
-                    Vector3 forceDirection = ragdoll.transform.position - m_camera.transform.position;
+                    Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
                     forceDirection.y = 1;
                     forceDirection.Normalize();
 
