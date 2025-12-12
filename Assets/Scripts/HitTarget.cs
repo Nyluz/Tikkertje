@@ -6,16 +6,20 @@ public class HitTarget : MonoBehaviour
     [SerializeField]
     private CharacterController characterController;
 
-    private Camera m_camera;
-
-    public float maximumForce;
-
-    private float velocity;
+    [SerializeField]
+    public float slapForce;
 
     [SerializeField]
-    private float velocityMultiplier = 4f;
+    private float velocityMultiplier = 5f;
 
-    public Texture2D crosshairTexture;
+    [SerializeField]
+    private Texture2D crosshairTexture;
+
+    private Camera m_camera;
+
+    [Header("Status")]
+    [SerializeField]
+    private float velocity;
 
     void OnGUI()
     {
@@ -29,11 +33,13 @@ public class HitTarget : MonoBehaviour
     void Awake()
     {
         m_camera = GetComponent<Camera>();
+        characterController = transform.parent.parent.GetComponent<CharacterController>();
     }
 
     void Update()
     {
-        velocity = characterController.velocity.magnitude * 5f;
+        velocity = characterController.velocity.magnitude;
+        float slapVelocity = velocity * velocityMultiplier;
 
         if (Mouse.current.leftButton.isPressed)
         {
@@ -48,7 +54,7 @@ public class HitTarget : MonoBehaviour
                     forceDirection.y = 1;
                     forceDirection.Normalize();
 
-                    Vector3 force = forceDirection * (maximumForce + velocity);
+                    Vector3 force = forceDirection * (slapForce + slapVelocity);
 
                     ragdoll.TriggerRagdoll(force, hitInfo.point);
                 }
