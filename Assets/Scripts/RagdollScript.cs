@@ -36,12 +36,12 @@ public class RagdollScript : MonoBehaviour
     [SerializeField] private Rigidbody[] ragdollRigidbodies;
     private Animator animator;
     public CharacterState characterState = CharacterState.Idle;
-    [SerializeField]
-    private float timeToWakeUp;
+    [SerializeField] private float timeToWakeUp;
     private float fallTimer;
     private float laydownTimer;
+    [SerializeField] private float standUpVelocity = 0.01f;
 
-    private Transform hipsBone;
+    [HideInInspector] public Transform hipsBone;
 
     private BoneTransform[] faceUpStandUpBoneTransforms;
     private BoneTransform[] faceDownStandUpBoneTransforms;
@@ -54,6 +54,7 @@ public class RagdollScript : MonoBehaviour
 
     [SerializeField] Vector3 forceDirection;
     [SerializeField] float forceMagnitude;
+
 
     void Awake()
     {
@@ -130,7 +131,8 @@ public class RagdollScript : MonoBehaviour
 
         animator.enabled = true;
 
-        characterController.excludeLayers = 0;
+        if (characterController)
+            characterController.excludeLayers = 0;
     }
 
     private void EnableRagdoll()
@@ -142,7 +144,8 @@ public class RagdollScript : MonoBehaviour
 
         animator.enabled = false;
 
-        characterController.excludeLayers = ~0;
+        if (characterController)
+            characterController.excludeLayers = ~0;
     }
 
     private void IdleBehaviour()
@@ -192,7 +195,7 @@ public class RagdollScript : MonoBehaviour
         if (fallTimer >= timeToWakeUp)
         {
 
-            if (ragdollRigidbodies[0].linearVelocity.sqrMagnitude < 0.01f)
+            if (ragdollRigidbodies[0].linearVelocity.sqrMagnitude < standUpVelocity)
             {
                 laydownTimer += Time.deltaTime;
 

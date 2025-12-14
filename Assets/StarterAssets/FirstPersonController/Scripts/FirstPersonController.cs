@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections;
 
 
+
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -90,12 +91,14 @@ namespace StarterAssets
         [SerializeField] private bool standingUp;
 
         [SerializeField] private float _animationBlendSpeed;
+        [SerializeField] private GameObject[] firstPersonHideModels;
 
         public float PovSensitivity = 1.5f;
 
         public CinemachineOrbitalFollow orbitalFollow;
 
         [SerializeField] private bool manualSwitchCamera;
+        private Coroutine disableModelsRoutine;
 
         private enum Modes
         {
@@ -130,7 +133,7 @@ namespace StarterAssets
 
         private void Start()
         {
-            currentCamera = cameras[0];
+            SwitchCamera(cameras[0]);
 
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
@@ -163,7 +166,7 @@ namespace StarterAssets
         {
             if (mode() == Modes.firstPerson)
             {
-                FPSCameraRotation();
+                FPSMode();
 
                 if (previousMode == Modes.thirdPerson && !manualSwitchCamera)
                     SwitchCamera(cameras[0]);
@@ -194,36 +197,17 @@ namespace StarterAssets
                 {
                     bodyDetached = false;
                     standingUp = true;
-
-                    // Set Player position to ragdoll position
-                    Vector3 ragdollPos = characterModel.transform.position;
-
-                    transform.position = ragdollPos;
-                    characterModel.transform.localPosition = Vector3.zero;
-                    characterModel.transform.localRotation = Quaternion.identity;
                 }
-            }
-
-            // When player is done standing up
-            if (ragdollScript.characterState == RagdollScript.CharacterState.Idle && standingUp)
-            {
-                standingUp = false;
             }
         }
 
-        private void FPSCameraRotation()
+        private void FPSMode()
         {
             // rotate the player left and right
             Vector2 look = lookAction.action.ReadValue<Vector2>();
-
-            float deltaTimeMultiplier =
-                Mouse.current != null ? 1f : Time.deltaTime;
-
-            float rotation =
-                look.x * RotationSpeed * deltaTimeMultiplier;
-
+            float deltaTimeMultiplier = Mouse.current != null ? 1f : Time.deltaTime;
+            float rotation = look.x * RotationSpeed * deltaTimeMultiplier;
             transform.Rotate(Vector3.up * rotation);
-
 
             // Rotate head with camera
             float x = currentCamera.transform.localEulerAngles.x;
@@ -233,6 +217,76 @@ namespace StarterAssets
             Vector3 euler = head.localEulerAngles;
             euler.x = x;
             head.localEulerAngles = euler;
+
+            // When player is done standing up
+            if (ragdollScript.characterState == RagdollScript.CharacterState.Idle && standingUp)
+            {
+                standingUp = false;
+
+                // Set Player position to ragdoll position
+                Vector3 ragdollPos = ragdollScript.hipsBone.position;
+
+                _controller.enabled = false;
+                transform.position = ragdollPos;
+                _controller.enabled = true;
+
+                characterModel.transform.localPosition = Vector3.zero;
+                characterModel.transform.localRotation = Quaternion.identity;
+
+                print("player moved to ragdoll");
+            }
+        }
+
+        private void SwitchCamera(CinemachineCamera newCamera)
+        {
+            foreach (var camera in cameras)
+            {
+                camera.Priority = 0;
+            }
+            newCamera.Priority = 10;
+            currentCamera = newCamera;
+
+            // If third person
+            if (currentCamera == cameras[1])
+            {
+                // Reset third person camera's position
+                StartCoroutine(RecenterRoutine(orbitalFollow));
+
+                // Turn models on again
+                if (disableModelsRoutine != null)
+                    StopCoroutine(disableModelsRoutine);
+                disableModelsRoutine = StartCoroutine(SwitchModelLayersAfterDelay(0f, 3));
+
+            }
+            // If first person
+            else if (currentCamera == cameras[0])
+            {
+                // Turn models off
+                if (disableModelsRoutine != null)
+                    StopCoroutine(disableModelsRoutine);
+                disableModelsRoutine = StartCoroutine(SwitchModelLayersAfterDelay(1f, 10));
+            }
+        }
+
+        IEnumerator SwitchModelLayersAfterDelay(float delay, int layer)
+        {
+            yield return new WaitForSeconds(delay);
+
+            foreach (var model in firstPersonHideModels)
+            {
+                model.layer = layer;
+            }
+        }
+
+
+        private void ToggleCamera()
+        {
+
+            if (currentCamera == cameras[0])
+                SwitchCamera(cameras[1]);
+            else if (currentCamera == cameras[1])
+                SwitchCamera(cameras[0]);
+
         }
 
         private void Move()
@@ -345,33 +399,6 @@ namespace StarterAssets
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
         }
 
-        private void SwitchCamera(CinemachineCamera newCamera)
-        {
-            foreach (var camera in cameras)
-            {
-                camera.Priority = 0;
-            }
-            newCamera.Priority = 10;
-            currentCamera = newCamera;
-
-            // Reset third person camera's position
-            if (currentCamera == cameras[1])
-            {
-                StartCoroutine(RecenterRoutine(orbitalFollow));
-            }
-
-        }
-
-        private void ToggleCamera()
-        {
-
-            if (currentCamera == cameras[0])
-                SwitchCamera(cameras[1]);
-            else if (currentCamera == cameras[1])
-                SwitchCamera(cameras[0]);
-
-        }
-
         IEnumerator RecenterRoutine(CinemachineOrbitalFollow orbital)
         {
             RecenterAxis(ref orbital.HorizontalAxis);
@@ -384,7 +411,6 @@ namespace StarterAssets
             DisableRecentering(ref orbital.VerticalAxis);
             DisableRecentering(ref orbital.RadialAxis);
 
-            print("recentered");
         }
 
         private void RecenterAxis(ref InputAxis axis)
