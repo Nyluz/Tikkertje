@@ -48,7 +48,7 @@ public class HitTarget : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
-                Ragdoll ragdoll = hitInfo.collider.GetComponentInParent<Ragdoll>();
+                RagdollScript ragdoll = hitInfo.collider.GetComponentInParent<RagdollScript>();
                 if (ragdoll != null)
                 {
                     Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
@@ -58,6 +58,7 @@ public class HitTarget : MonoBehaviour
                     Vector3 force = forceDirection * (slapForce + slapVelocity);
 
                     ragdoll.TriggerRagdoll(force, hitInfo.point);
+                    print(force);
                 }
             }
         }

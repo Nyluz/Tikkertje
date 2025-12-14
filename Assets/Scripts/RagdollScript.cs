@@ -1,14 +1,16 @@
 using System.Linq;
 using UnityEngine;
-public class Ragdoll : MonoBehaviour
+using UnityEngine.InputSystem;
+public class RagdollScript : MonoBehaviour
 {
+    [SerializeField] private CharacterController characterController;
     private class BoneTransform
     {
         public Vector3 Position { get; set; }
         public Quaternion Rotation { get; set; }
     }
 
-    private enum CharacterState
+    public enum CharacterState
     {
         Idle,
         Ragdoll,
@@ -31,12 +33,13 @@ public class Ragdoll : MonoBehaviour
     [SerializeField]
     private float timeToResetBones;
 
-    private Rigidbody[] ragdollRigidbodies;
+    [SerializeField] private Rigidbody[] ragdollRigidbodies;
     private Animator animator;
-    private CharacterState characterState = CharacterState.Idle;
+    public CharacterState characterState = CharacterState.Idle;
     [SerializeField]
     private float timeToWakeUp;
-    private float timer;
+    private float fallTimer;
+    private float laydownTimer;
 
     private Transform hipsBone;
 
@@ -44,13 +47,17 @@ public class Ragdoll : MonoBehaviour
     private BoneTransform[] faceDownStandUpBoneTransforms;
 
     private BoneTransform[] ragdollBoneTransforms;
-    private Transform[] bones;
+    [SerializeField] private Transform[] bones;
     private float elapsedResetBonesTime;
 
     private bool isFacingUp;
 
+    [SerializeField] Vector3 forceDirection;
+    [SerializeField] float forceMagnitude;
+
     void Awake()
     {
+        characterController = GetComponentInParent<CharacterController>();
         ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
         animator = GetComponent<Animator>();
 
@@ -69,7 +76,6 @@ public class Ragdoll : MonoBehaviour
 
             ragdollBoneTransforms[i] = new BoneTransform();
         }
-
 
         PopulateAnimationStartBoneTransforms(faceUpStandUpClipName, faceUpStandUpBoneTransforms);
         PopulateAnimationStartBoneTransforms(faceDownStandUpClipName, faceDownStandUpBoneTransforms);
@@ -95,6 +101,15 @@ public class Ragdoll : MonoBehaviour
                 ResetBonesBehaviour();
                 break;
         }
+
+        if (Keyboard.current.enterKey.IsPressed())
+        {
+            if (characterState == CharacterState.Idle)
+            {
+                Vector3 force = forceDirection * forceMagnitude;
+                TriggerRagdoll(force, bones[0].transform.position);
+            }
+        }
     }
 
     public void TriggerRagdoll(Vector3 force, Vector3 hitpoint)
@@ -114,6 +129,8 @@ public class Ragdoll : MonoBehaviour
         }
 
         animator.enabled = true;
+
+        characterController.excludeLayers = 0;
     }
 
     private void EnableRagdoll()
@@ -124,6 +141,8 @@ public class Ragdoll : MonoBehaviour
         }
 
         animator.enabled = false;
+
+        characterController.excludeLayers = ~0;
     }
 
     private void IdleBehaviour()
@@ -168,18 +187,32 @@ public class Ragdoll : MonoBehaviour
 
     private void RagdollBehaviour()
     {
-        timer += Time.deltaTime;
-        if (timer >= timeToWakeUp)
+        fallTimer += Time.deltaTime;
+
+        if (fallTimer >= timeToWakeUp)
         {
-            timer = 0;
-            isFacingUp = hipsBone.forward.y > 0f;
-            AlignPositionToHips();
-            AlignRotationToHips();
 
-            PopulateBoneTransforms(ragdollBoneTransforms);
+            if (ragdollRigidbodies[0].linearVelocity.sqrMagnitude < 0.01f)
+            {
+                laydownTimer += Time.deltaTime;
 
-            characterState = CharacterState.ResettingBones;
-            elapsedResetBonesTime = 0;
+                if (laydownTimer >= timeToWakeUp)
+                {
+                    fallTimer = 0;
+                    laydownTimer = 0;
+
+                    isFacingUp = hipsBone.forward.y > 0f;
+
+                    AlignPositionToHips();
+                    AlignRotationToHips();
+
+                    PopulateBoneTransforms(ragdollBoneTransforms);
+
+                    characterState = CharacterState.ResettingBones;
+                    elapsedResetBonesTime = 0f;
+
+                }
+            }
         }
     }
 

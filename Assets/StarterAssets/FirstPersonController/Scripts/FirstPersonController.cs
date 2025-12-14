@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿using Unity.Cinemachine;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Collections;
+
+
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -44,19 +49,17 @@ namespace StarterAssets
         public LayerMask GroundLayers;
 
         [Header("Cinemachine")]
-        [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
-        public GameObject CinemachineCameraTarget;
+
         [Tooltip("How far in degrees can you move the camera up")]
         public float TopClamp = 90.0f;
         [Tooltip("How far in degrees can you move the camera down")]
         public float BottomClamp = -90.0f;
 
-        // cinemachine
-        private float _cinemachineTargetPitch;
+        private CinemachineCamera currentCamera;
+        [SerializeField] private List<CinemachineCamera> cameras = new List<CinemachineCamera>();
 
         // player
         private float _speed;
-        private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
 
@@ -64,71 +67,70 @@ namespace StarterAssets
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
-
-#if ENABLE_INPUT_SYSTEM
-        private PlayerInput _playerInput;
-#endif
         private CharacterController _controller;
         private Animator _animator;
         private StarterAssetsInputs _input;
-        private Transform _playerCamera;
 
         [SerializeField]
-        private Transform cameraRoot;
-        [SerializeField]
-        private Transform head;
-        [SerializeField]
-        private Vector3 cameraOffset;
+        private InputActionReference lookAction;
 
-        [SerializeField]
-        private float cameraRotationClamp_min;
-        [SerializeField]
-        private float cameraRotationClamp_max;
+        private RagdollScript ragdollScript;
+        private HitTarget hitTargetScript;
 
-        [SerializeField]
+        [SerializeField] private Transform characterModel;
+        [SerializeField] private Transform head;
+
+        [SerializeField] private float headRotationClamp_min;
+        [SerializeField] private float headRotationClamp_max;
+
         private float currentVelocity_x;
-
-        [SerializeField]
         private float currentVelocity_y;
 
-        [SerializeField]
-        private float _animationBlendSpeed;
+        [SerializeField] private bool bodyDetached;
+        [SerializeField] private bool standingUp;
 
-        private const float _threshold = 0.01f;
+        [SerializeField] private float _animationBlendSpeed;
 
-        private bool IsCurrentDeviceMouse
+        public float PovSensitivity = 1.5f;
+
+        public CinemachineOrbitalFollow orbitalFollow;
+
+        [SerializeField] private bool manualSwitchCamera;
+
+        private enum Modes
         {
-            get
-            {
-#if ENABLE_INPUT_SYSTEM
-                return _playerInput.currentControlScheme == "KeyboardMouse";
-#else
-				return false;
-#endif
-            }
+            firstPerson,
+            thirdPerson
+        }
+
+        private Modes previousMode;
+        private Modes mode()
+        {
+            if (ragdollScript.characterState == RagdollScript.CharacterState.Idle)
+                return Modes.firstPerson;
+            else
+                return Modes.thirdPerson;
+        }
+
+        private bool hitTargetEnabled()
+        {
+            if (currentCamera == cameras[0])
+                return true;
+            else return false;
         }
 
         private void Awake()
         {
-            // get a reference to our main camera
-            if (_playerCamera == null)
-            {
-                _playerCamera = GetComponentInChildren<Camera>().transform;
-
-            }
-
             _animator = GetComponentInChildren<Animator>();
+            ragdollScript = GetComponentInChildren<RagdollScript>();
+            hitTargetScript = GetComponent<HitTarget>();
+            _controller = GetComponent<CharacterController>();
+            _input = GetComponent<StarterAssetsInputs>();
         }
 
         private void Start()
         {
-            _controller = GetComponent<CharacterController>();
-            _input = GetComponent<StarterAssetsInputs>();
-#if ENABLE_INPUT_SYSTEM
-            _playerInput = GetComponent<PlayerInput>();
-#else
-			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
-#endif
+            currentCamera = cameras[0];
 
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
@@ -137,58 +139,96 @@ namespace StarterAssets
 
         private void Update()
         {
-            JumpAndGravity();
-            GroundedCheck();
+            hitTargetScript.enabled = hitTargetEnabled();
+
+            if (Keyboard.current.rKey.wasPressedThisFrame)
+            {
+                //ToggleCamera();
+
+                //StartCoroutine(RecenterRoutine(orbitalFollow));
+            }
         }
 
         private void FixedUpdate()
         {
+            if (ragdollScript.characterState != RagdollScript.CharacterState.Idle)
+                return;
+
+            JumpAndGravity();
+            GroundedCheck();
             Move();
         }
 
         private void LateUpdate()
         {
-            CameraPosition();
-            CameraRotation();
-        }
-
-        private void GroundedCheck()
-        {
-            // set sphere position, with offset
-            Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-            Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
-        }
-
-        private void CameraPosition()
-        {
-            cameraRoot.position = head.position + head.TransformDirection(cameraOffset);
-        }
-
-        private void CameraRotation()
-        {
-            // if there is an input
-            if (_input.look.sqrMagnitude >= _threshold)
+            if (mode() == Modes.firstPerson)
             {
-                //Don't multiply mouse input by Time.deltaTime
-                float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+                FPSCameraRotation();
 
-                _cinemachineTargetPitch += _input.look.y * RotationSpeed * deltaTimeMultiplier;
-                _rotationVelocity = _input.look.x * RotationSpeed * deltaTimeMultiplier;
+                if (previousMode == Modes.thirdPerson && !manualSwitchCamera)
+                    SwitchCamera(cameras[0]);
+            }
+            else if (mode() == Modes.thirdPerson)
+            {
+                RagdollMode();
 
-                // clamp our pitch rotation
-                _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
-
-                // Update Cinemachine camera target pitch
-                CinemachineCameraTarget.transform.localRotation = Quaternion.Euler(_cinemachineTargetPitch, 0.0f, 0.0f);
-
-                // rotate the player left and right
-                transform.Rotate(Vector3.up * _rotationVelocity);
+                if (previousMode == Modes.firstPerson && !manualSwitchCamera)
+                    SwitchCamera(cameras[1]);
             }
 
+            previousMode = mode();
+        }
+
+        private void RagdollMode()
+        {
+            // When player enters ragdoll mode
+            if (ragdollScript.characterState == RagdollScript.CharacterState.Ragdoll && !bodyDetached)
+            {
+                bodyDetached = true;
+            }
+
+            if (bodyDetached)
+            {
+                // When player gets out of ragdoll mode
+                if (ragdollScript.characterState == RagdollScript.CharacterState.ResettingBones)
+                {
+                    bodyDetached = false;
+                    standingUp = true;
+
+                    // Set Player position to ragdoll position
+                    Vector3 ragdollPos = characterModel.transform.position;
+
+                    transform.position = ragdollPos;
+                    characterModel.transform.localPosition = Vector3.zero;
+                    characterModel.transform.localRotation = Quaternion.identity;
+                }
+            }
+
+            // When player is done standing up
+            if (ragdollScript.characterState == RagdollScript.CharacterState.Idle && standingUp)
+            {
+                standingUp = false;
+            }
+        }
+
+        private void FPSCameraRotation()
+        {
+            // rotate the player left and right
+            Vector2 look = lookAction.action.ReadValue<Vector2>();
+
+            float deltaTimeMultiplier =
+                Mouse.current != null ? 1f : Time.deltaTime;
+
+            float rotation =
+                look.x * RotationSpeed * deltaTimeMultiplier;
+
+            transform.Rotate(Vector3.up * rotation);
+
+
             // Rotate head with camera
-            float x = cameraRoot.localEulerAngles.x;
+            float x = currentCamera.transform.localEulerAngles.x;
             if (x > 180f) x -= 360f;
-            x = Mathf.Clamp(x, cameraRotationClamp_min, cameraRotationClamp_max);
+            x = Mathf.Clamp(x, headRotationClamp_min, headRotationClamp_max);
 
             Vector3 euler = head.localEulerAngles;
             euler.x = x;
@@ -242,9 +282,6 @@ namespace StarterAssets
             _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
             Vector3 localVelocity = transform.InverseTransformDirection(_controller.velocity);
-
-            //currentVelocity_x = localVelocity.x;
-            //currentVelocity_y = localVelocity.z;
 
             currentVelocity_x = Mathf.Lerp(currentVelocity_x, localVelocity.x, _animationBlendSpeed * Time.deltaTime);
             currentVelocity_y = Mathf.Lerp(currentVelocity_y, localVelocity.z, _animationBlendSpeed * Time.deltaTime);
@@ -301,23 +338,73 @@ namespace StarterAssets
             }
         }
 
-        private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+        private void GroundedCheck()
         {
-            if (lfAngle < -360f) lfAngle += 360f;
-            if (lfAngle > 360f) lfAngle -= 360f;
-            return Mathf.Clamp(lfAngle, lfMin, lfMax);
+            // set sphere position, with offset
+            Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+            Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
         }
 
-        private void OnDrawGizmosSelected()
+        private void SwitchCamera(CinemachineCamera newCamera)
         {
-            Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-            Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
+            foreach (var camera in cameras)
+            {
+                camera.Priority = 0;
+            }
+            newCamera.Priority = 10;
+            currentCamera = newCamera;
 
-            if (Grounded) Gizmos.color = transparentGreen;
-            else Gizmos.color = transparentRed;
+            // Reset third person camera's position
+            if (currentCamera == cameras[1])
+            {
+                StartCoroutine(RecenterRoutine(orbitalFollow));
+            }
 
-            // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
-            Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
         }
+
+        private void ToggleCamera()
+        {
+
+            if (currentCamera == cameras[0])
+                SwitchCamera(cameras[1]);
+            else if (currentCamera == cameras[1])
+                SwitchCamera(cameras[0]);
+
+        }
+
+        IEnumerator RecenterRoutine(CinemachineOrbitalFollow orbital)
+        {
+            RecenterAxis(ref orbital.HorizontalAxis);
+            RecenterAxis(ref orbital.VerticalAxis);
+            RecenterAxis(ref orbital.RadialAxis);
+
+            yield return null; // wait 1 frame
+
+            DisableRecentering(ref orbital.HorizontalAxis);
+            DisableRecentering(ref orbital.VerticalAxis);
+            DisableRecentering(ref orbital.RadialAxis);
+
+            print("recentered");
+        }
+
+        private void RecenterAxis(ref InputAxis axis)
+        {
+            var inputAxis = axis;
+
+            inputAxis.Center = 0f;
+            inputAxis.Recentering.Enabled = true;
+            inputAxis.Recentering.Wait = 0;
+            inputAxis.Recentering.Time = 0f;
+
+            axis = inputAxis;
+        }
+
+        private void DisableRecentering(ref InputAxis axis)
+        {
+            var recentering = axis.Recentering;
+            recentering.Enabled = false;
+            axis.Recentering = recentering;
+        }
+
     }
 }
