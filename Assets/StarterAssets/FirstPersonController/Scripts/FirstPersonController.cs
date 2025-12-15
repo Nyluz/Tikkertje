@@ -38,6 +38,8 @@ namespace StarterAssets
         public float JumpTimeout = 0.1f;
         [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
         public float FallTimeout = 0.15f;
+        [SerializeField] private bool isJumping;
+        [SerializeField] private bool isFalling;
 
         [Header("Player Grounded")]
         [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
@@ -61,19 +63,19 @@ namespace StarterAssets
 
         // player
         private float _speed;
-        private float _verticalVelocity;
+        [SerializeField] private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
-        private CharacterController _controller;
-        private Animator _animator;
+        private CharacterController controller;
+        private Animator animator;
         private StarterAssetsInputs _input;
 
-        [SerializeField]
-        private InputActionReference lookAction;
+        [SerializeField] private InputActionReference lookAction;
+        [SerializeField] private InputActionReference moveAction;
 
         private RagdollScript ragdollScript;
         private HitTarget hitTargetScript;
@@ -100,6 +102,9 @@ namespace StarterAssets
         [SerializeField] private bool manualSwitchCamera;
         private Coroutine disableModelsRoutine;
 
+        [SerializeField] float maxRagdollFallVelocity = -5f;
+        [SerializeField] float ragdollFallingVelocityMulitplier = 10f;
+
         private enum Modes
         {
             firstPerson,
@@ -122,12 +127,24 @@ namespace StarterAssets
             else return false;
         }
 
+        private bool hasInput()
+        {
+            if (moveAction.action.ReadValue<Vector2>().magnitude != 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         private void Awake()
         {
-            _animator = GetComponentInChildren<Animator>();
+            animator = GetComponentInChildren<Animator>();
             ragdollScript = GetComponentInChildren<RagdollScript>();
             hitTargetScript = GetComponent<HitTarget>();
-            _controller = GetComponent<CharacterController>();
+            controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
         }
 
@@ -144,10 +161,11 @@ namespace StarterAssets
         {
             hitTargetScript.enabled = hitTargetEnabled();
 
+            animator.SetBool("PlayerInput", hasInput());
+
             if (Keyboard.current.rKey.wasPressedThisFrame)
             {
                 //ToggleCamera();
-
                 //StartCoroutine(RecenterRoutine(orbitalFollow));
             }
         }
@@ -160,6 +178,9 @@ namespace StarterAssets
             JumpAndGravity();
             GroundedCheck();
             Move();
+
+
+
         }
 
         private void LateUpdate()
@@ -226,14 +247,12 @@ namespace StarterAssets
                 // Set Player position to ragdoll position
                 Vector3 ragdollPos = ragdollScript.hipsBone.position;
 
-                _controller.enabled = false;
+                controller.enabled = false;
                 transform.position = ragdollPos;
-                _controller.enabled = true;
+                controller.enabled = true;
 
                 characterModel.transform.localPosition = Vector3.zero;
                 characterModel.transform.localRotation = Quaternion.identity;
-
-                print("player moved to ragdoll");
             }
         }
 
@@ -281,12 +300,10 @@ namespace StarterAssets
 
         private void ToggleCamera()
         {
-
             if (currentCamera == cameras[0])
                 SwitchCamera(cameras[1]);
             else if (currentCamera == cameras[1])
                 SwitchCamera(cameras[0]);
-
         }
 
         private void Move()
@@ -301,7 +318,7 @@ namespace StarterAssets
             if (_input.move == Vector2.zero) targetSpeed = 0.0f;
 
             // a reference to the players current horizontal velocity
-            float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+            float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
             float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
@@ -333,19 +350,21 @@ namespace StarterAssets
             }
 
             // move the player
-            _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+            controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
-            Vector3 localVelocity = transform.InverseTransformDirection(_controller.velocity);
+            Vector3 localVelocity = transform.InverseTransformDirection(controller.velocity);
 
             currentVelocity_x = Mathf.Lerp(currentVelocity_x, localVelocity.x, _animationBlendSpeed * Time.deltaTime);
             currentVelocity_y = Mathf.Lerp(currentVelocity_y, localVelocity.z, _animationBlendSpeed * Time.deltaTime);
 
-            _animator.SetFloat(Animator.StringToHash("X_Velocity"), currentVelocity_x);
-            _animator.SetFloat(Animator.StringToHash("Y_Velocity"), currentVelocity_y);
+            animator.SetFloat(Animator.StringToHash("X_Velocity"), currentVelocity_x);
+            animator.SetFloat(Animator.StringToHash("Y_Velocity"), currentVelocity_y);
         }
 
         private void JumpAndGravity()
         {
+            float fallingVelocity = 0;
+
             if (Grounded)
             {
                 // reset the fall timeout timer
@@ -354,6 +373,7 @@ namespace StarterAssets
                 // stop our velocity dropping infinitely when grounded
                 if (_verticalVelocity < 0.0f)
                 {
+                    fallingVelocity = _verticalVelocity;
                     _verticalVelocity = -2f;
                 }
 
@@ -362,6 +382,7 @@ namespace StarterAssets
                 {
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                    isJumping = true;
                 }
 
                 // jump timeout
@@ -369,17 +390,39 @@ namespace StarterAssets
                 {
                     _jumpTimeoutDelta -= Time.deltaTime;
                 }
+
+                if (isFalling)
+                {
+                    isFalling = false;
+
+                    print(fallingVelocity + 2.5f);
+                    if ((fallingVelocity + 2.5f) < maxRagdollFallVelocity)
+                    {
+                        ragdollScript.TriggerRagdoll(Vector3.up * fallingVelocity * ragdollFallingVelocityMulitplier, characterModel.transform.position);
+                    }
+                    else
+                    {
+                        StartCoroutine(MoveZeroForSeconds(.5f));
+                    }
+                }
             }
             else
             {
                 // reset the jump timeout timer
                 _jumpTimeoutDelta = JumpTimeout;
 
+                if (isJumping && _fallTimeoutDelta < 0)
+                {
+                    isJumping = false;
+                }
+
                 // fall timeout
                 if (_fallTimeoutDelta >= 0.0f)
                 {
                     _fallTimeoutDelta -= Time.deltaTime;
                 }
+
+                isFalling = true;
 
                 // if we are not grounded, do not jump
                 _input.jump = false;
@@ -389,6 +432,21 @@ namespace StarterAssets
             if (_verticalVelocity < _terminalVelocity)
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
+            }
+
+            animator.SetBool("IsJumping", isJumping);
+            animator.SetBool("IsFalling", isFalling);
+            animator.SetBool("IsGrounded", Grounded);
+        }
+
+        IEnumerator MoveZeroForSeconds(float duration)
+        {
+            float t = 0f;
+            while (t < duration)
+            {
+                controller.Move(Vector3.zero);
+                t += Time.deltaTime;
+                yield return null;
             }
         }
 

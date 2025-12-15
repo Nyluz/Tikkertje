@@ -1793,6 +1793,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 185726027}
   m_LocalEulerAnglesHint: {x: 23.535, y: 0, z: 0}
+--- !u!114 &916317313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1515ab76e54f068e2f2207940fab32, type: 3}
+  m_Name: Player/Move
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
+  m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ActionId: 351f2ccd-1f9f-44bf-9bec-d62ac5c5f408
 --- !u!1 &1039880694
 GameObject:
   m_ObjectHideFlags: 0
@@ -3744,6 +3758,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1405106961}
     - target: {fileID: 4359696049254544489, guid: 91dcd95fa911d714ea2fa7d7c3850c4d, type: 3}
+      propertyPath: moveAction
+      value: 
+      objectReference: {fileID: 916317313}
+    - target: {fileID: 4359696049254544489, guid: 91dcd95fa911d714ea2fa7d7c3850c4d, type: 3}
       propertyPath: RotationSpeed
       value: 0.1
       objectReference: {fileID: 0}
@@ -3751,6 +3769,10 @@ PrefabInstance:
       propertyPath: orbitalFollow
       value: 
       objectReference: {fileID: 1747408334}
+    - target: {fileID: 4359696049254544489, guid: 91dcd95fa911d714ea2fa7d7c3850c4d, type: 3}
+      propertyPath: SpeedChangeRate
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4359696049254544489, guid: 91dcd95fa911d714ea2fa7d7c3850c4d, type: 3}
       propertyPath: firstPersonCamera
       value: 
@@ -3775,6 +3797,10 @@ PrefabInstance:
       propertyPath: 'cameras.Array.data[1]'
       value: 
       objectReference: {fileID: 1747408333}
+    - target: {fileID: 4359696049254544489, guid: 91dcd95fa911d714ea2fa7d7c3850c4d, type: 3}
+      propertyPath: maxRagdollFallVelocity
+      value: -6
+      objectReference: {fileID: 0}
     - target: {fileID: 4359696049254544489, guid: 91dcd95fa911d714ea2fa7d7c3850c4d, type: 3}
       propertyPath: CinemachineCameraTarget
       value: 
