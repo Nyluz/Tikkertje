@@ -5,6 +5,7 @@ using System.Collections;
 
 
 
+
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -105,6 +106,9 @@ namespace StarterAssets
         [SerializeField] float maxRagdollFallVelocity = -5f;
         [SerializeField] float ragdollFallingVelocityMulitplier = 10f;
 
+
+        CinemachineOrbitalFollow orbital;
+
         private enum Modes
         {
             firstPerson,
@@ -146,6 +150,8 @@ namespace StarterAssets
             hitTargetScript = GetComponent<HitTarget>();
             controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
+
+            orbital = cameras[1].GetComponent<CinemachineOrbitalFollow>();
         }
 
         private void Start()
@@ -155,6 +161,8 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+
+            Application.targetFrameRate = 60;
         }
 
         private void Update()
@@ -179,8 +187,6 @@ namespace StarterAssets
             GroundedCheck();
             Move();
 
-
-
         }
 
         private void LateUpdate()
@@ -203,6 +209,11 @@ namespace StarterAssets
             previousMode = mode();
         }
 
+        [SerializeField] float horizontalSpeed = 180f;
+        [SerializeField] float verticalSpeed = 120f;
+        [SerializeField] float minVertical = -30f;
+        [SerializeField] float maxVertical = 60f;
+
         private void RagdollMode()
         {
             // When player enters ragdoll mode
@@ -220,21 +231,52 @@ namespace StarterAssets
                     standingUp = true;
                 }
             }
+
+            Vector2 look = lookAction.action.ReadValue<Vector2>();
+
+            // Horizontal orbit (yaw)
+            orbital.HorizontalAxis.Value +=
+                look.x * horizontalSpeed * Time.deltaTime;
+
+            // Vertical orbit (pitch)
+            orbital.VerticalAxis.Value -=
+                look.y * verticalSpeed * Time.deltaTime;
+
+            orbital.VerticalAxis.Value =
+                Mathf.Clamp(orbital.VerticalAxis.Value, minVertical, maxVertical);
+
         }
+
+        [SerializeField] float yawSpeed = 10f;
+        [SerializeField] float pitchSpeed = 10f;
+        [SerializeField] float minPitch = -60f;
+        [SerializeField] float maxPitch = 60f;
+
+        float pitch;
 
         private void FPSMode()
         {
-            // rotate the player left and right
+            //// Rotate the player left and right
+            //Vector2 look = lookAction.action.ReadValue<Vector2>();
+            //float deltaTimeMultiplier = Mouse.current != null ? 1f : Time.deltaTime;
+            //float rotation = look.x * RotationSpeed * deltaTimeMultiplier;
+            //transform.Rotate(Vector3.up * rotation);
+
             Vector2 look = lookAction.action.ReadValue<Vector2>();
-            float deltaTimeMultiplier = Mouse.current != null ? 1f : Time.deltaTime;
-            float rotation = look.x * RotationSpeed * deltaTimeMultiplier;
-            transform.Rotate(Vector3.up * rotation);
+
+            // Yaw (player) – mouse is fine without dt
+            transform.Rotate(Vector3.up * look.x * yawSpeed * Time.deltaTime);
+
+            // Pitch (camera) – MUST be time-scaled
+            pitch -= look.y * pitchSpeed * Time.deltaTime;
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+            cameras[0].transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
 
             // Rotate head with camera
             float x = currentCamera.transform.localEulerAngles.x;
             if (x > 180f) x -= 360f;
             x = Mathf.Clamp(x, headRotationClamp_min, headRotationClamp_max);
-
             Vector3 euler = head.localEulerAngles;
             euler.x = x;
             head.localEulerAngles = euler;
@@ -394,15 +436,17 @@ namespace StarterAssets
                 if (isFalling)
                 {
                     isFalling = false;
-
-                    print(fallingVelocity + 2.5f);
                     if ((fallingVelocity + 2.5f) < maxRagdollFallVelocity)
                     {
                         ragdollScript.TriggerRagdoll(Vector3.up * fallingVelocity * ragdollFallingVelocityMulitplier, characterModel.transform.position);
                     }
                     else
                     {
-                        StartCoroutine(MoveZeroForSeconds(.5f));
+                        float stunTime = 0.2f;
+                        if (fallingVelocity < 7f)
+                            stunTime = 0.5f;
+
+                        StartCoroutine(MoveZeroForSeconds(stunTime));
                     }
                 }
             }

@@ -14,9 +14,14 @@ public class HitTarget : MonoBehaviour
 
     [SerializeField]
     private Texture2D crosshairTexture;
-
     [SerializeField]
+    private Texture2D handTexture;
+    private float crosshairSize;
+
+    private Texture2D currentCrosshair;
     private Camera player_camera;
+
+    [SerializeField] private float tagDistance;
 
     [Header("Status")]
     [SerializeField]
@@ -24,11 +29,11 @@ public class HitTarget : MonoBehaviour
 
     void OnGUI()
     {
-        float size = 32;
+        float size = crosshairSize;
         float x = (Screen.width - size) / 2f;
         float y = (Screen.height - size) / 2f;
 
-        GUI.DrawTexture(new Rect(x, y, size, size), crosshairTexture);
+        GUI.DrawTexture(new Rect(x, y, size, size), currentCrosshair);
     }
 
     void Awake()
@@ -42,24 +47,36 @@ public class HitTarget : MonoBehaviour
         velocity = characterController.velocity.magnitude;
         float slapVelocity = velocity * velocityMultiplier;
 
-        if (Mouse.current.leftButton.isPressed)
+        float distance = 0f;
+
+        Ray ray = new Ray(player_camera.transform.position, player_camera.transform.forward);
+
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
-            Ray ray = new Ray(player_camera.transform.position, player_camera.transform.forward);
-
-            if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            RagdollScript ragdoll = hitInfo.collider.GetComponentInParent<RagdollScript>();
+            if (ragdoll != null)
             {
-                RagdollScript ragdoll = hitInfo.collider.GetComponentInParent<RagdollScript>();
-                if (ragdoll != null)
+                distance = Vector3.Distance(player_camera.transform.position, ragdoll.transform.position);
+
+                if (distance < tagDistance && ragdoll.tag == "Sheep")
                 {
-                    Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
-                    forceDirection.y = 1;
-                    forceDirection.Normalize();
+                    currentCrosshair = handTexture;
+                    crosshairSize = 64f;
+                    if (Mouse.current.leftButton.isPressed)
+                    {
+                        Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
+                        forceDirection.y = 1;
+                        forceDirection.Normalize();
 
-                    Vector3 force = forceDirection * (slapForce + slapVelocity);
+                        Vector3 force = forceDirection * (slapForce + slapVelocity);
 
-                    ragdoll.TriggerRagdoll(force, hitInfo.point);
+                        ragdoll.TriggerRagdoll(force, hitInfo.point);
+                    }
+                    return;
                 }
             }
         }
+        currentCrosshair = crosshairTexture;
+        crosshairSize = 16f;
     }
 }

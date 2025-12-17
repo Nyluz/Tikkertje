@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 6930560575499865168}
   m_Layer: 3
   m_Name: RightHandIndex1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 5709890110846671674}
   m_Layer: 3
   m_Name: Neck
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -298,7 +298,7 @@ GameObject:
   - component: {fileID: 8078220923895560817}
   m_Layer: 3
   m_Name: RightUpLeg
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -426,7 +426,7 @@ GameObject:
   - component: {fileID: 6987890676389267667}
   m_Layer: 3
   m_Name: LeftHand
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -631,7 +631,7 @@ GameObject:
   - component: {fileID: 4626633128015099476}
   m_Layer: 3
   m_Name: LeftHandIndex1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -663,7 +663,7 @@ GameObject:
   - component: {fileID: 7051694402991238920}
   m_Layer: 3
   m_Name: RightHandPinky2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -694,7 +694,7 @@ GameObject:
   - component: {fileID: 6444702912313255459}
   m_Layer: 3
   m_Name: LeftHandPinky1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -726,7 +726,7 @@ GameObject:
   - component: {fileID: 7238936125926069099}
   m_Layer: 3
   m_Name: RightHandMiddle1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -758,7 +758,7 @@ GameObject:
   - component: {fileID: 850321062351383865}
   m_Layer: 3
   m_Name: LeftHandThumb1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -793,7 +793,7 @@ GameObject:
   - component: {fileID: 2496545370446710053}
   m_Layer: 3
   m_Name: RightForeArm
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -921,7 +921,7 @@ GameObject:
   - component: {fileID: 71316506688078525}
   m_Layer: 3
   m_Name: Spine
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -953,7 +953,7 @@ GameObject:
   - component: {fileID: 203419957076574562}
   m_Layer: 3
   m_Name: RightHandProp
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -984,7 +984,7 @@ GameObject:
   - component: {fileID: 2230555185673575560}
   m_Layer: 3
   m_Name: RightShoulder
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1016,7 +1016,7 @@ GameObject:
   - component: {fileID: 3803214845162418346}
   m_Layer: 3
   m_Name: LeftToeBase
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1050,7 +1050,7 @@ GameObject:
   - component: {fileID: 2369516488244775647}
   m_Layer: 3
   m_Name: RightLeg
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1309,7 +1309,7 @@ GameObject:
   - component: {fileID: 4729482140142462502}
   m_Layer: 3
   m_Name: RightHandMiddle2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1340,7 +1340,7 @@ GameObject:
   - component: {fileID: 1808988480925436187}
   m_Layer: 3
   m_Name: RightHand
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1380,7 +1380,7 @@ GameObject:
   - component: {fileID: 9110584409149641190}
   m_Layer: 3
   m_Name: LeftForeArm
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1540,7 +1540,7 @@ GameObject:
   - component: {fileID: 5822774101417132833}
   m_Layer: 3
   m_Name: LeftHandMiddle2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1845,7 +1845,7 @@ GameObject:
   - component: {fileID: 3884143641935422533}
   m_Layer: 3
   m_Name: Head
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1949,7 +1949,7 @@ GameObject:
   - component: {fileID: 4187741022494179395}
   m_Layer: 3
   m_Name: RightHandThumb1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1981,7 +1981,7 @@ GameObject:
   - component: {fileID: 1997431374630660357}
   m_Layer: 3
   m_Name: LeftHandProp
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2081,12 +2081,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a61689c2af92d5e4e8d9df6edd9b10c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ragdoll
+  characterController: {fileID: 0}
   faceUpstandUpStateName: Face Up Stand Up
   faceDownstandUpStateName: Face Down Stand Up
   faceUpStandUpClipName: Stand Up
   faceDownStandUpClipName: Standing Up
   timeToResetBones: 0.5
+  ragdollRigidbodies: []
+  characterState: 0
   timeToWakeUp: 4
+  standUpVelocity: 0.01
+  hipsBone: {fileID: 0}
+  bones: []
+  forceDirection: {x: 0, y: 0, z: 0}
+  forceMagnitude: 0
 --- !u!1 &5597086876180785777
 GameObject:
   m_ObjectHideFlags: 0
@@ -2234,7 +2242,7 @@ GameObject:
   - component: {fileID: 4259584266648391170}
   m_Layer: 3
   m_Name: RightHandRing1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2405,7 +2413,7 @@ GameObject:
   - component: {fileID: 4202167081802816426}
   m_Layer: 3
   m_Name: RightArm
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2533,7 +2541,7 @@ GameObject:
   - component: {fileID: 4362856922245523788}
   m_Layer: 3
   m_Name: RightHandRing2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2975,7 +2983,7 @@ GameObject:
   - component: {fileID: 2299046139380295099}
   m_Layer: 3
   m_Name: Spine1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3106,7 +3114,7 @@ GameObject:
   - component: {fileID: 6412591459552307479}
   m_Layer: 3
   m_Name: LeftArm
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3234,7 +3242,7 @@ GameObject:
   - component: {fileID: 6559914237949843827}
   m_Layer: 3
   m_Name: LeftFoot
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3266,7 +3274,7 @@ GameObject:
   - component: {fileID: 2728993308961128525}
   m_Layer: 3
   m_Name: LeftHandIndex2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3297,7 +3305,7 @@ GameObject:
   - component: {fileID: 1619747742360256425}
   m_Layer: 3
   m_Name: RightHandThumb2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3328,7 +3336,7 @@ GameObject:
   - component: {fileID: 5097209741702670355}
   m_Layer: 3
   m_Name: LeftHandRing1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3360,7 +3368,7 @@ GameObject:
   - component: {fileID: 6851879142755916281}
   m_Layer: 3
   m_Name: RightHandIndex2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3527,7 +3535,7 @@ GameObject:
   - component: {fileID: 7743842849437472328}
   m_Layer: 3
   m_Name: RightToeBase
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3558,7 +3566,7 @@ GameObject:
   - component: {fileID: 7759064103473291111}
   m_Layer: 3
   m_Name: LeftHandRing2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3589,7 +3597,7 @@ GameObject:
   - component: {fileID: 1106660736169578773}
   m_Layer: 3
   m_Name: RightFoot
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3624,7 +3632,7 @@ GameObject:
   - component: {fileID: 2315655156323155522}
   m_Layer: 3
   m_Name: LeftLeg
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3752,7 +3760,7 @@ GameObject:
   - component: {fileID: 1193050835966324221}
   m_Layer: 3
   m_Name: LeftShoulder
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3784,7 +3792,7 @@ GameObject:
   - component: {fileID: 452093256496069886}
   m_Layer: 3
   m_Name: LeftHandPinky2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3815,7 +3823,7 @@ GameObject:
   - component: {fileID: 4733618745807952193}
   m_Layer: 3
   m_Name: LeftHandThumb2
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3846,7 +3854,7 @@ GameObject:
   - component: {fileID: 5343887481450728940}
   m_Layer: 3
   m_Name: RightHandPinky1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4014,7 +4022,7 @@ GameObject:
   - component: {fileID: 7873540470498181914}
   m_Layer: 3
   m_Name: LeftHandMiddle1
-  m_TagString: Untagged
+  m_TagString: Sheep
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
