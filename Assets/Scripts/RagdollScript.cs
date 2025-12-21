@@ -135,6 +135,7 @@ public class RagdollScript : MonoBehaviour
 
         if (characterController)
             characterController.excludeLayers = 0;
+
     }
 
     private void EnableRagdoll()

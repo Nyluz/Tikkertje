@@ -1,10 +1,11 @@
+using StarterAssets;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class HitTarget : MonoBehaviour
 {
     [SerializeField]
     private CharacterController characterController;
+    private InputScript input;
 
     [SerializeField]
     public float slapForce;
@@ -22,6 +23,7 @@ public class HitTarget : MonoBehaviour
     private Camera player_camera;
 
     [SerializeField] private float tagDistance;
+    [SerializeField] private float slapVelocity;
 
     [Header("Status")]
     [SerializeField]
@@ -40,13 +42,14 @@ public class HitTarget : MonoBehaviour
     {
         player_camera = GetComponentInChildren<Camera>();
         characterController = GetComponent<CharacterController>();
+        input = GetComponent<InputScript>();
         currentCrosshair = crosshairTexture;
     }
 
     void Update()
     {
         velocity = characterController.velocity.magnitude;
-        float slapVelocity = velocity * velocityMultiplier;
+
 
         float distance = 0f;
 
@@ -63,12 +66,13 @@ public class HitTarget : MonoBehaviour
                 {
                     currentCrosshair = handTexture;
                     crosshairSize = 64f;
-                    if (Mouse.current.leftButton.isPressed)
+                    if (input.slap)
                     {
                         Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
                         forceDirection.y = 1;
                         forceDirection.Normalize();
 
+                        slapVelocity = velocity * velocityMultiplier;
                         Vector3 force = forceDirection * (slapForce + slapVelocity);
 
                         ragdoll.TriggerRagdoll(force, hitInfo.point);

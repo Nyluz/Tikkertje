@@ -15,11 +15,12 @@ namespace StarterAssets
         public bool cursorInputForLook = true;
 
         [Header("Input Action References")]
-        public InputActionReference lookAction;
-        public InputActionReference moveAction;
-        public InputActionReference jumpAction;
-        public InputActionReference slapAction;
-        public InputActionReference sprintAction;
+        public InputActionAsset inputActions;
+        private InputAction lookAction;
+        private InputAction moveAction;
+        private InputAction jumpAction;
+        private InputAction slapAction;
+        private InputAction sprintAction;
 
         [Header("Raw Input Values")]
         public Vector2 lookInput;
@@ -40,25 +41,30 @@ namespace StarterAssets
             SetCursorState(cursorLocked);
         }
 
+        private void Awake()
+        {
+            lookAction = inputActions.FindAction("Look");
+            moveAction = inputActions.FindAction("Move");
+            jumpAction = inputActions.FindAction("Jump");
+            slapAction = inputActions.FindAction("Slap");
+            sprintAction = inputActions.FindAction("Sprint");
+        }
+
         private void LateUpdate()
         {
             // Raw inputs
-            lookInput = lookAction.action.ReadValue<Vector2>();
-            moveInput = moveAction.action.ReadValue<Vector2>();
-            jumpInput = jumpAction.action.ReadValue<float>() != 0f;
-            slapInput = slapAction.action.ReadValue<float>() != 0f;
-            sprintInput = sprintAction.action.ReadValue<float>();
+            lookInput = lookAction.ReadValue<Vector2>();
+            moveInput = moveAction.ReadValue<Vector2>();
+            jumpInput = jumpAction.ReadValue<float>() != 0f;
+            slapInput = slapAction.ReadValue<float>() != 0f;
+            sprintInput = sprintAction.ReadValue<float>();
 
             // Player actions
             look = lookInput != Vector2.zero;
             move = moveInput != Vector2.zero;
-            jump = jumpAction.action.WasPressedThisFrame();
-            slap = slapAction.action.WasPressedThisFrame();
-            sprint = sprintAction.action.IsPressed();
-
-
-            if (jump)
-                print("button!");
+            jump = jumpAction.WasPressedThisFrame();
+            slap = slapAction.WasPressedThisFrame();
+            sprint = sprintAction.IsPressed();
         }
 
         private void SetCursorState(bool newState)

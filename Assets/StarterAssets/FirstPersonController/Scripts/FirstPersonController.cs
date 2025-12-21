@@ -26,6 +26,7 @@ namespace StarterAssets
         [SerializeField] private LayerMask GroundLayers;
         [SerializeField] private float GroundedOffset = -0.14f;
         [SerializeField] private float GroundedRadius = 0.5f;
+        [SerializeField] private PhysicsMaterial colliderMaterial;
 
         [Header("Ragdoll")]
         [SerializeField] private float maxRagdollFallVelocity = -5f;
@@ -129,7 +130,7 @@ namespace StarterAssets
         {
             SwitchCamera(cameras[0]);
             _fallTimeoutDelta = FallTimeout;
-
+            controller.sharedMaterial = colliderMaterial;
             Application.targetFrameRate = 60;
         }
 
@@ -291,7 +292,7 @@ namespace StarterAssets
             if (!input.sprint)
                 stats.GainStamina();
 
-            if (input.sprint && stats.currentStamina > 0)
+            if (input.move && input.sprint && stats.currentStamina > 0)
                 stats.DrainStamina();
 
             Vector2 moveInput = input.moveInput;
@@ -375,7 +376,6 @@ namespace StarterAssets
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
                     isJumping = true;
-                    print("Jump!");
                 }
 
                 if (isFalling)
