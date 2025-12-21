@@ -6,28 +6,28 @@ namespace StarterAssets
     {
 
         [Header("Output")]
-        public StarterAssetsInputs starterAssetsInputs;
+        public InputScript starterAssetsInputs;
 
         public void VirtualMoveInput(Vector2 virtualMoveDirection)
         {
-            starterAssetsInputs.MoveInput(virtualMoveDirection);
+            //starterAssetsInputs.MoveInput(virtualMoveDirection);
         }
 
         public void VirtualLookInput(Vector2 virtualLookDirection)
         {
-            starterAssetsInputs.LookInput(virtualLookDirection);
+            //starterAssetsInputs.LookInput(virtualLookDirection);
         }
 
         public void VirtualJumpInput(bool virtualJumpState)
         {
-            starterAssetsInputs.JumpInput(virtualJumpState);
+            //starterAssetsInputs.JumpInput(virtualJumpState);
         }
 
         public void VirtualSprintInput(bool virtualSprintState)
         {
-            starterAssetsInputs.SprintInput(virtualSprintState);
+            //starterAssetsInputs.SprintInput(virtualSprintState);
         }
-        
+
     }
 
 }

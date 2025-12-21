@@ -40,6 +40,7 @@ public class HitTarget : MonoBehaviour
     {
         player_camera = GetComponentInChildren<Camera>();
         characterController = GetComponent<CharacterController>();
+        currentCrosshair = crosshairTexture;
     }
 
     void Update()

@@ -1,113 +1,83 @@
-﻿using Unity.Cinemachine;
+﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine;
-using System.Collections;
-
-
-
-
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
 
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-#if ENABLE_INPUT_SYSTEM
-    [RequireComponent(typeof(PlayerInput))]
-#endif
+
     public class FirstPersonController : MonoBehaviour
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
-        public float MoveSpeed = 2.0f;
+        [SerializeField] private float MoveSpeed = 2.0f;
         [Tooltip("Sprint speed of the character in m/s")]
-        public float SprintSpeed = 6.0f;
-        [Tooltip("Rotation speed of the character")]
-        public float RotationSpeed = 1.0f;
+        [SerializeField] private float SprintSpeed = 6.0f;
         [Tooltip("Acceleration and deceleration")]
-        public float SpeedChangeRate = 10.0f;
-
-        [Space(10)]
+        [SerializeField] private float SpeedChangeRate = 10.0f;
         [Tooltip("The height the player can jump")]
-        public float JumpHeight = 1.2f;
+        [SerializeField] private float JumpHeight = 1.2f;
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
-        public float Gravity = -15.0f;
-
-        [Space(10)]
-        [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-        public float JumpTimeout = 0.1f;
+        [SerializeField] private float Gravity = -15.0f;
+        [SerializeField] private float _terminalVelocity = 53.0f;
         [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
-        public float FallTimeout = 0.15f;
-        [SerializeField] private bool isJumping;
-        [SerializeField] private bool isFalling;
+        [SerializeField] private float FallTimeout = 0.30f;
+        [SerializeField] private LayerMask GroundLayers;
+        [SerializeField] private float GroundedOffset = -0.14f;
+        [SerializeField] private float GroundedRadius = 0.5f;
 
-        [Header("Player Grounded")]
-        [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
-        public bool Grounded = true;
-        [Tooltip("Useful for rough ground")]
-        public float GroundedOffset = -0.14f;
-        [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController")]
-        public float GroundedRadius = 0.5f;
-        [Tooltip("What layers the character uses as ground")]
-        public LayerMask GroundLayers;
+        [Header("Ragdoll")]
+        [SerializeField] private float maxRagdollFallVelocity = -5f;
+        [SerializeField] private float minStunFallVelocity = -8f;
+        [SerializeField] private float ragdollFallingVelocityMulitplier = 10f;
 
-        [Header("Cinemachine")]
+        [Header("3rd Person Camera")]
+        [SerializeField] private float horizontalSpeed = 180f;
+        [SerializeField] private float verticalSpeed = 120f;
+        [SerializeField] private float minVertical = -30f;
+        [SerializeField] private float maxVertical = 60f;
 
-        [Tooltip("How far in degrees can you move the camera up")]
-        public float TopClamp = 90.0f;
-        [Tooltip("How far in degrees can you move the camera down")]
-        public float BottomClamp = -90.0f;
-
-        private CinemachineCamera currentCamera;
-        [SerializeField] private List<CinemachineCamera> cameras = new List<CinemachineCamera>();
-
-        // player
-        private float _speed;
-        [SerializeField] private float _verticalVelocity;
-        private float _terminalVelocity = 53.0f;
-
-        // timeout deltatime
-        private float _jumpTimeoutDelta;
-        private float _fallTimeoutDelta;
-
-        private CharacterController controller;
-        private Animator animator;
-        private StarterAssetsInputs _input;
-
-        [SerializeField] private InputActionReference lookAction;
-        [SerializeField] private InputActionReference moveAction;
-
-        private RagdollScript ragdollScript;
-        private HitTarget hitTargetScript;
-
-        [SerializeField] private Transform characterModel;
-        [SerializeField] private Transform head;
+        [Header("First Person Camera")]
+        [SerializeField] private float yawSpeed = 10f;
+        [SerializeField] private float pitchSpeed = 10f;
+        [SerializeField] private float minPitch = -60f;
+        [SerializeField] private float maxPitch = 60f;
+        [Space(10)]
 
         [SerializeField] private float headRotationClamp_min;
         [SerializeField] private float headRotationClamp_max;
+        [SerializeField] private float _animationBlendSpeed;
 
-        private float currentVelocity_x;
-        private float currentVelocity_y;
+        [Header("Dependencies")]
+        [SerializeField] private List<CinemachineCamera> cameras = new List<CinemachineCamera>();
+        [SerializeField] private GameObject[] firstPersonHideModels;
+        [SerializeField] private Transform characterModel;
+        [SerializeField] private Transform head;
 
+        [Header("State")]
+        [SerializeField] private float currentVelocity_x;
+        [SerializeField] private float currentVelocity_y;
+        [SerializeField] private float _verticalVelocity;
+        [SerializeField] private bool Grounded = true;
+        [SerializeField] private bool isJumping;
+        [SerializeField] private bool isFalling;
         [SerializeField] private bool bodyDetached;
         [SerializeField] private bool standingUp;
+        [SerializeField] private float speed;
+        [SerializeField] private CinemachineCamera currentCamera;
 
-        [SerializeField] private float _animationBlendSpeed;
-        [SerializeField] private GameObject[] firstPersonHideModels;
-
-        public float PovSensitivity = 1.5f;
-
-        public CinemachineOrbitalFollow orbitalFollow;
-
-        [SerializeField] private bool manualSwitchCamera;
         private Coroutine disableModelsRoutine;
+        private CinemachineOrbitalFollow orbitalFollow;
+        private RagdollScript ragdollScript;
+        private HitTarget hitTargetScript;
+        private CharacterController controller;
+        private Animator animator;
+        private InputScript input;
+        private PlayerStats stats;
 
-        [SerializeField] float maxRagdollFallVelocity = -5f;
-        [SerializeField] float ragdollFallingVelocityMulitplier = 10f;
-
-
-        CinemachineOrbitalFollow orbital;
+        private float _fallTimeoutDelta;
+        private float pitch;
 
         private enum Modes
         {
@@ -116,9 +86,10 @@ namespace StarterAssets
         }
 
         private Modes previousMode;
+
         private Modes mode()
         {
-            if (ragdollScript.characterState == RagdollScript.CharacterState.Idle)
+            if (ragdollScript.state == RagdollScript.State.Idle)
                 return Modes.firstPerson;
             else
                 return Modes.thirdPerson;
@@ -133,7 +104,7 @@ namespace StarterAssets
 
         private bool hasInput()
         {
-            if (moveAction.action.ReadValue<Vector2>().magnitude != 0)
+            if (input.moveInput.magnitude != 0)
             {
                 return true;
             }
@@ -149,17 +120,14 @@ namespace StarterAssets
             ragdollScript = GetComponentInChildren<RagdollScript>();
             hitTargetScript = GetComponent<HitTarget>();
             controller = GetComponent<CharacterController>();
-            _input = GetComponent<StarterAssetsInputs>();
-
-            orbital = cameras[1].GetComponent<CinemachineOrbitalFollow>();
+            input = GetComponent<InputScript>();
+            orbitalFollow = cameras[1].GetComponent<CinemachineOrbitalFollow>();
+            stats = GetComponent<PlayerStats>();
         }
 
         private void Start()
         {
             SwitchCamera(cameras[0]);
-
-            // reset our timeouts on start
-            _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
 
             Application.targetFrameRate = 60;
@@ -168,25 +136,17 @@ namespace StarterAssets
         private void Update()
         {
             hitTargetScript.enabled = hitTargetEnabled();
-
             animator.SetBool("PlayerInput", hasInput());
-
-            if (Keyboard.current.rKey.wasPressedThisFrame)
-            {
-                //ToggleCamera();
-                //StartCoroutine(RecenterRoutine(orbitalFollow));
-            }
         }
 
         private void FixedUpdate()
         {
-            if (ragdollScript.characterState != RagdollScript.CharacterState.Idle)
+            if (ragdollScript.state != RagdollScript.State.Idle)
                 return;
 
             JumpAndGravity();
             GroundedCheck();
             Move();
-
         }
 
         private void LateUpdate()
@@ -195,94 +155,26 @@ namespace StarterAssets
             {
                 FPSMode();
 
-                if (previousMode == Modes.thirdPerson && !manualSwitchCamera)
+                if (previousMode == Modes.thirdPerson)
                     SwitchCamera(cameras[0]);
             }
             else if (mode() == Modes.thirdPerson)
             {
                 RagdollMode();
 
-                if (previousMode == Modes.firstPerson && !manualSwitchCamera)
+                if (previousMode == Modes.firstPerson)
                     SwitchCamera(cameras[1]);
             }
 
             previousMode = mode();
         }
 
-        [SerializeField] float horizontalSpeed = 180f;
-        [SerializeField] float verticalSpeed = 120f;
-        [SerializeField] float minVertical = -30f;
-        [SerializeField] float maxVertical = 60f;
-
-        private void RagdollMode()
-        {
-            // When player enters ragdoll mode
-            if (ragdollScript.characterState == RagdollScript.CharacterState.Ragdoll && !bodyDetached)
-            {
-                bodyDetached = true;
-            }
-
-            if (bodyDetached)
-            {
-                // When player gets out of ragdoll mode
-                if (ragdollScript.characterState == RagdollScript.CharacterState.ResettingBones)
-                {
-                    bodyDetached = false;
-                    standingUp = true;
-                }
-            }
-
-            Vector2 look = lookAction.action.ReadValue<Vector2>();
-
-            // Horizontal orbit (yaw)
-            orbital.HorizontalAxis.Value +=
-                look.x * horizontalSpeed * Time.deltaTime;
-
-            // Vertical orbit (pitch)
-            orbital.VerticalAxis.Value -=
-                look.y * verticalSpeed * Time.deltaTime;
-
-            orbital.VerticalAxis.Value =
-                Mathf.Clamp(orbital.VerticalAxis.Value, minVertical, maxVertical);
-
-        }
-
-        [SerializeField] float yawSpeed = 10f;
-        [SerializeField] float pitchSpeed = 10f;
-        [SerializeField] float minPitch = -60f;
-        [SerializeField] float maxPitch = 60f;
-
-        float pitch;
-
         private void FPSMode()
         {
-            //// Rotate the player left and right
-            //Vector2 look = lookAction.action.ReadValue<Vector2>();
-            //float deltaTimeMultiplier = Mouse.current != null ? 1f : Time.deltaTime;
-            //float rotation = look.x * RotationSpeed * deltaTimeMultiplier;
-            //transform.Rotate(Vector3.up * rotation);
-
-            Vector2 look = lookAction.action.ReadValue<Vector2>();
-
-            // Yaw (player) – mouse is fine without dt
-            transform.Rotate(Vector3.up * look.x * yawSpeed * Time.deltaTime);
-
-            // Pitch (camera) – MUST be time-scaled
-            pitch -= look.y * pitchSpeed * Time.deltaTime;
-            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-
-            cameras[0].transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-
-            // Rotate head with camera
-            float x = currentCamera.transform.localEulerAngles.x;
-            if (x > 180f) x -= 360f;
-            x = Mathf.Clamp(x, headRotationClamp_min, headRotationClamp_max);
-            Vector3 euler = head.localEulerAngles;
-            euler.x = x;
-            head.localEulerAngles = euler;
+            RotateFPSCamera();
 
             // When player is done standing up
-            if (ragdollScript.characterState == RagdollScript.CharacterState.Idle && standingUp)
+            if (ragdollScript.state == RagdollScript.State.Idle && standingUp)
             {
                 standingUp = false;
 
@@ -290,12 +182,67 @@ namespace StarterAssets
                 Vector3 ragdollPos = ragdollScript.hipsBone.position;
 
                 controller.enabled = false;
-                transform.position = ragdollPos;
+                transform.position = ragdollPos - new Vector3(0, .75f, 0);
                 controller.enabled = true;
 
                 characterModel.transform.localPosition = Vector3.zero;
                 characterModel.transform.localRotation = Quaternion.identity;
             }
+        }
+
+        private void RotateFPSCamera()
+        {
+            // Rotate player
+            Vector2 look = input.lookInput;
+            transform.Rotate(Vector3.up * look.x * yawSpeed * Time.deltaTime);
+            // Rotate camera
+            pitch -= look.y * pitchSpeed * Time.deltaTime;
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+            cameras[0].transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+
+            // Rotate character head with camera angle
+            float x = currentCamera.transform.localEulerAngles.x;
+            if (x > 180f) x -= 360f;
+            x = Mathf.Clamp(x, headRotationClamp_min, headRotationClamp_max);
+            Vector3 euler = head.localEulerAngles;
+            euler.x = x;
+            head.localEulerAngles = euler;
+        }
+
+        private void RagdollMode()
+        {
+            RotateThirdPersonCamera();
+
+            // When player enters ragdoll mode
+            if (ragdollScript.state == RagdollScript.State.Ragdoll && !bodyDetached)
+            {
+                bodyDetached = true;
+            }
+
+            if (bodyDetached)
+            {
+                // When player gets out of ragdoll mode
+                if (ragdollScript.state == RagdollScript.State.ResettingBones)
+                {
+                    bodyDetached = false;
+                    standingUp = true;
+                }
+            }
+        }
+
+        private void RotateThirdPersonCamera()
+        {
+            Vector2 look = input.lookInput;
+            // Horizontal orbit (yaw)
+            orbitalFollow.HorizontalAxis.Value +=
+                look.x * horizontalSpeed * Time.deltaTime;
+
+            // Vertical orbit (pitch)
+            orbitalFollow.VerticalAxis.Value -=
+                look.y * verticalSpeed * Time.deltaTime;
+
+            orbitalFollow.VerticalAxis.Value =
+                Mathf.Clamp(orbitalFollow.VerticalAxis.Value, minVertical, maxVertical);
         }
 
         private void SwitchCamera(CinemachineCamera newCamera)
@@ -339,68 +286,69 @@ namespace StarterAssets
             }
         }
 
-
-        private void ToggleCamera()
-        {
-            if (currentCamera == cameras[0])
-                SwitchCamera(cameras[1]);
-            else if (currentCamera == cameras[1])
-                SwitchCamera(cameras[0]);
-        }
-
         private void Move()
         {
+            if (!input.sprint)
+                stats.GainStamina();
+
+            if (input.sprint && stats.currentStamina > 0)
+                stats.DrainStamina();
+
+            Vector2 moveInput = input.moveInput;
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            float targetSpeed = input.sprint && stats.currentStamina > 0 ? SprintSpeed : MoveSpeed;
 
-            // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
-
-            // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is no input, set the target speed to 0
-            if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+            if (moveInput == Vector2.zero) targetSpeed = 0.0f;
 
             // a reference to the players current horizontal velocity
             float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
-            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+            float inputMagnitude = moveInput.magnitude;
 
             // accelerate or decelerate to target speed
             if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
             {
                 // creates curved result rather than a linear one giving a more organic speed change
                 // note T in Lerp is clamped, so we don't need to clamp our speed
-                _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
+                speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
 
                 // round speed to 3 decimal places
-                _speed = Mathf.Round(_speed * 1000f) / 1000f;
+                speed = Mathf.Round(speed * 1000f) / 1000f;
             }
             else
             {
-                _speed = targetSpeed;
+                speed = targetSpeed * inputMagnitude;
             }
 
             // normalise input direction
-            Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+            Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
-            if (_input.move != Vector2.zero)
+            if (moveInput != Vector2.zero)
             {
                 // move
-                inputDirection = transform.right * _input.move.x + transform.forward * _input.move.y;
+                inputDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
             }
 
-            // move the player
-            controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+            // Move the player
+            controller.Move(inputDirection.normalized * (speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
+            // Animator
             Vector3 localVelocity = transform.InverseTransformDirection(controller.velocity);
-
             currentVelocity_x = Mathf.Lerp(currentVelocity_x, localVelocity.x, _animationBlendSpeed * Time.deltaTime);
             currentVelocity_y = Mathf.Lerp(currentVelocity_y, localVelocity.z, _animationBlendSpeed * Time.deltaTime);
 
             animator.SetFloat(Animator.StringToHash("X_Velocity"), currentVelocity_x);
             animator.SetFloat(Animator.StringToHash("Y_Velocity"), currentVelocity_y);
+
+            float t = Mathf.InverseLerp(MoveSpeed, SprintSpeed, speed);
+            float animSpeed = Mathf.Lerp(1f, 1.33f, t);
+            animator.SetFloat("MoveSpeed", animSpeed);
+
         }
 
         private void JumpAndGravity()
@@ -409,6 +357,8 @@ namespace StarterAssets
 
             if (Grounded)
             {
+                isJumping = false;
+
                 // reset the fall timeout timer
                 _fallTimeoutDelta = FallTimeout;
 
@@ -420,56 +370,48 @@ namespace StarterAssets
                 }
 
                 // Jump
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (input.jump)
                 {
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
                     isJumping = true;
-                }
-
-                // jump timeout
-                if (_jumpTimeoutDelta >= 0.0f)
-                {
-                    _jumpTimeoutDelta -= Time.deltaTime;
+                    print("Jump!");
                 }
 
                 if (isFalling)
                 {
                     isFalling = false;
-                    if ((fallingVelocity + 2.5f) < maxRagdollFallVelocity)
+
+                    if ((fallingVelocity) < maxRagdollFallVelocity)
                     {
                         ragdollScript.TriggerRagdoll(Vector3.up * fallingVelocity * ragdollFallingVelocityMulitplier, characterModel.transform.position);
                     }
                     else
                     {
-                        float stunTime = 0.2f;
-                        if (fallingVelocity < 7f)
-                            stunTime = 0.5f;
-
+                        float stunTime = 0.1f;
+                        if (fallingVelocity < -8f)
+                        {
+                            float t = Mathf.InverseLerp(minStunFallVelocity, maxRagdollFallVelocity, fallingVelocity);
+                            stunTime = Mathf.Lerp(0.1f, 1.5f, t);
+                        }
                         StartCoroutine(MoveZeroForSeconds(stunTime));
                     }
                 }
+
             }
             else
             {
-                // reset the jump timeout timer
-                _jumpTimeoutDelta = JumpTimeout;
-
-                if (isJumping && _fallTimeoutDelta < 0)
-                {
-                    isJumping = false;
-                }
-
                 // fall timeout
                 if (_fallTimeoutDelta >= 0.0f)
                 {
                     _fallTimeoutDelta -= Time.deltaTime;
                 }
+                else
+                {
+                    isJumping = false;
+                    isFalling = true;
+                }
 
-                isFalling = true;
-
-                // if we are not grounded, do not jump
-                _input.jump = false;
             }
 
             // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)

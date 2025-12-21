@@ -10,7 +10,7 @@ public class RagdollScript : MonoBehaviour
         public Quaternion Rotation { get; set; }
     }
 
-    public enum CharacterState
+    public enum State
     {
         Idle,
         Ragdoll,
@@ -35,7 +35,7 @@ public class RagdollScript : MonoBehaviour
 
     [SerializeField] private Rigidbody[] ragdollRigidbodies;
     private Animator animator;
-    public CharacterState characterState = CharacterState.Idle;
+    public State state = State.Idle;
     [SerializeField] private float timeToWakeUp;
     private float fallTimer;
     private float laydownTimer;
@@ -87,25 +87,24 @@ public class RagdollScript : MonoBehaviour
 
     void Update()
     {
-        switch (characterState)
+        switch (state)
         {
-            case CharacterState.Idle:
-                IdleBehaviour();
+            case State.Idle:
                 break;
-            case CharacterState.Ragdoll:
+            case State.Ragdoll:
                 RagdollBehaviour();
                 break;
-            case CharacterState.StandingUp:
+            case State.StandingUp:
                 StandingUpBehaviour();
                 break;
-            case CharacterState.ResettingBones:
+            case State.ResettingBones:
                 ResetBonesBehaviour();
                 break;
         }
 
         if (Keyboard.current.enterKey.IsPressed())
         {
-            if (characterState == CharacterState.Idle)
+            if (state == State.Idle)
             {
                 Vector3 force = forceDirection * forceMagnitude;
                 TriggerRagdoll(force, bones[0].transform.position);
@@ -119,7 +118,7 @@ public class RagdollScript : MonoBehaviour
 
         Rigidbody hitRigidbody = ragdollRigidbodies.OrderBy(rigidbody => Vector3.Distance(rigidbody.position, hitpoint)).FirstOrDefault();
         hitRigidbody.AddForceAtPosition(force, hitpoint, ForceMode.Impulse);
-        characterState = CharacterState.Ragdoll;
+        state = State.Ragdoll;
     }
 
     private void DisableRagdoll()
@@ -128,6 +127,9 @@ public class RagdollScript : MonoBehaviour
         {
             rigidbody.isKinematic = true;
         }
+
+        animator.Rebind();
+        animator.Update(0f);
 
         animator.enabled = true;
 
@@ -148,16 +150,11 @@ public class RagdollScript : MonoBehaviour
             characterController.excludeLayers = ~0;
     }
 
-    private void IdleBehaviour()
-    {
-
-    }
-
     private void StandingUpBehaviour()
     {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName(GetStandUpStateName()) == false)
         {
-            characterState = CharacterState.Idle;
+            state = State.Idle;
         }
     }
 
@@ -182,7 +179,7 @@ public class RagdollScript : MonoBehaviour
 
         if (elapsedPercentage >= 1)
         {
-            characterState = CharacterState.StandingUp;
+            state = State.StandingUp;
             DisableRagdoll();
             animator.Play(GetStandUpStateName(), 0, 0f);
         }
@@ -211,7 +208,7 @@ public class RagdollScript : MonoBehaviour
 
                     PopulateBoneTransforms(ragdollBoneTransforms);
 
-                    characterState = CharacterState.ResettingBones;
+                    state = State.ResettingBones;
                     elapsedResetBonesTime = 0f;
 
                 }
