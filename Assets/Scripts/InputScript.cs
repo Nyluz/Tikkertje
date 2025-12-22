@@ -5,6 +5,9 @@ using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
+#if ENABLE_INPUT_SYSTEM
+    [RequireComponent(typeof(PlayerInput))]
+#endif
     public class InputScript : MonoBehaviour
     {
         [Header("Movement Settings")]
@@ -14,13 +17,15 @@ namespace StarterAssets
         public bool cursorLocked = true;
         public bool cursorInputForLook = true;
 
-        [Header("Input Action References")]
-        public InputActionAsset inputActions;
+#if ENABLE_INPUT_SYSTEM
+        private PlayerInput playerInput;
+
         private InputAction lookAction;
         private InputAction moveAction;
         private InputAction jumpAction;
         private InputAction slapAction;
         private InputAction sprintAction;
+#endif
 
         [Header("Raw Input Values")]
         public Vector2 lookInput;
@@ -43,28 +48,35 @@ namespace StarterAssets
 
         private void Awake()
         {
-            lookAction = inputActions.FindAction("Look");
-            moveAction = inputActions.FindAction("Move");
-            jumpAction = inputActions.FindAction("Jump");
-            slapAction = inputActions.FindAction("Slap");
-            sprintAction = inputActions.FindAction("Sprint");
+#if ENABLE_INPUT_SYSTEM
+            playerInput = GetComponent<PlayerInput>();
+
+            // IMPORTANT: use the per-player actions instance from PlayerInput
+            var actions = playerInput.actions;
+
+            lookAction = actions.FindAction("Look", true);
+            moveAction = actions.FindAction("Move", true);
+            jumpAction = actions.FindAction("Jump", true);
+            slapAction = actions.FindAction("Slap", true);
+            sprintAction = actions.FindAction("Sprint", true);
+#endif
         }
 
-        private void LateUpdate()
+        private void Update()
         {
-            // Raw inputs
+#if ENABLE_INPUT_SYSTEM
             lookInput = lookAction.ReadValue<Vector2>();
             moveInput = moveAction.ReadValue<Vector2>();
             jumpInput = jumpAction.ReadValue<float>() != 0f;
             slapInput = slapAction.ReadValue<float>() != 0f;
             sprintInput = sprintAction.ReadValue<float>();
 
-            // Player actions
             look = lookInput != Vector2.zero;
             move = moveInput != Vector2.zero;
             jump = jumpAction.WasPressedThisFrame();
             slap = slapAction.WasPressedThisFrame();
             sprint = sprintAction.IsPressed();
+#endif
         }
 
         private void SetCursorState(bool newState)
@@ -72,5 +84,4 @@ namespace StarterAssets
             Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
         }
     }
-
 }

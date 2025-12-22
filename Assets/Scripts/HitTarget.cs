@@ -5,6 +5,7 @@ public class HitTarget : MonoBehaviour
 {
     [SerializeField]
     private CharacterController characterController;
+    private PlayerUI playerUI;
     private InputScript input;
 
     [SerializeField]
@@ -13,13 +14,9 @@ public class HitTarget : MonoBehaviour
     [SerializeField]
     private float velocityMultiplier = 5f;
 
-    [SerializeField]
-    private Texture2D crosshairTexture;
-    [SerializeField]
-    private Texture2D handTexture;
-    private float crosshairSize;
+    [SerializeField] private Sprite crosshairTexture;
+    [SerializeField] private Sprite handTexture;
 
-    private Texture2D currentCrosshair;
     private Camera player_camera;
 
     [SerializeField] private float tagDistance;
@@ -29,21 +26,12 @@ public class HitTarget : MonoBehaviour
     [SerializeField]
     private float velocity;
 
-    void OnGUI()
-    {
-        float size = crosshairSize;
-        float x = (Screen.width - size) / 2f;
-        float y = (Screen.height - size) / 2f;
-
-        GUI.DrawTexture(new Rect(x, y, size, size), currentCrosshair);
-    }
-
     void Awake()
     {
         player_camera = GetComponentInChildren<Camera>();
         characterController = GetComponent<CharacterController>();
         input = GetComponent<InputScript>();
-        currentCrosshair = crosshairTexture;
+        playerUI = GetComponentInChildren<PlayerUI>();
     }
 
     void Update()
@@ -64,8 +52,7 @@ public class HitTarget : MonoBehaviour
 
                 if (distance < tagDistance && ragdoll.tag == "Sheep")
                 {
-                    currentCrosshair = handTexture;
-                    crosshairSize = 64f;
+                    playerUI.SetCrosshair(handTexture, 64);
                     if (input.slap)
                     {
                         Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
@@ -81,7 +68,7 @@ public class HitTarget : MonoBehaviour
                 }
             }
         }
-        currentCrosshair = crosshairTexture;
-        crosshairSize = 16f;
+
+        playerUI.SetCrosshair(crosshairTexture, 16);
     }
 }

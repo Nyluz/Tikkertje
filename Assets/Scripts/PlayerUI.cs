@@ -14,6 +14,8 @@ public class PlayerUI : MonoBehaviour
     public Color staminaHandleColor;
     public Color staminaHandleColorBonus;
 
+    public Image crossHairImage;
+
     private void Awake()
     {
         stats = transform.parent.GetComponent<PlayerStats>();
@@ -22,6 +24,12 @@ public class PlayerUI : MonoBehaviour
     void Update()
     {
         SetStamina(stats.currentStamina);
+    }
+
+    public void SetCrosshair(Sprite sprite, int size)
+    {
+        crossHairImage.rectTransform.sizeDelta = new Vector2(size, size);
+        crossHairImage.sprite = sprite;
     }
 
     public void SetStamina(float stamina)
@@ -37,7 +45,5 @@ public class PlayerUI : MonoBehaviour
             staminaFillImage.color = staminaFillColor;
             staminaHandleImage.color = staminaHandleColor;
         }
-
     }
-
 }

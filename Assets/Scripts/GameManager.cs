@@ -1,22 +1,21 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
-    private PlayerInputManager playerInputManager;
+    PlayerInputManager playerInputManager;
+    public List<GameObject> players;
 
     private void Awake()
     {
         playerInputManager = GetComponent<PlayerInputManager>();
+        playerInputManager.onPlayerJoined += HandlePlayerJoined;
     }
 
-    private void Start()
+    private void HandlePlayerJoined(PlayerInput playerInput)
     {
-        playerInputManager.JoinPlayer();
-    }
-
-    void Update()
-    {
-
+        players.Add(playerInput.gameObject);
+        playerInput.gameObject.GetComponentInChildren<SplitScreenCamera>().Setup();
     }
 }

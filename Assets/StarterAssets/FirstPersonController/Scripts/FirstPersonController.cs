@@ -145,8 +145,8 @@ namespace StarterAssets
             if (ragdollScript.state != RagdollScript.State.Idle)
                 return;
 
-            JumpAndGravity();
             GroundedCheck();
+            JumpAndGravity();
             Move();
         }
 
@@ -196,6 +196,7 @@ namespace StarterAssets
             // Rotate player
             Vector2 look = input.lookInput;
             transform.Rotate(Vector3.up * look.x * yawSpeed * Time.deltaTime);
+
             // Rotate camera
             pitch -= look.y * pitchSpeed * Time.deltaTime;
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
