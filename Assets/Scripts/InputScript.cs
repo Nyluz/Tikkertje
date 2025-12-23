@@ -62,6 +62,13 @@ namespace StarterAssets
 #endif
         }
 
+        private void Start()
+        {
+            var pi = GetComponent<PlayerInput>();
+            foreach (var d in pi.devices)
+                Debug.Log($"Player {pi.playerIndex} device: {d.displayName}");
+        }
+
         private void Update()
         {
 #if ENABLE_INPUT_SYSTEM

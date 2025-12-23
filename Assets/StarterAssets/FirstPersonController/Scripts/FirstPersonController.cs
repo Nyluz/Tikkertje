@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
@@ -76,6 +77,7 @@ namespace StarterAssets
         private Animator animator;
         private InputScript input;
         private PlayerStats stats;
+        private PlayerInput playerInput;
 
         private float _fallTimeoutDelta;
         private float pitch;
@@ -124,6 +126,7 @@ namespace StarterAssets
             input = GetComponent<InputScript>();
             orbitalFollow = cameras[1].GetComponent<CinemachineOrbitalFollow>();
             stats = GetComponent<PlayerStats>();
+            playerInput = GetComponent<PlayerInput>();
         }
 
         private void Start()
@@ -265,7 +268,7 @@ namespace StarterAssets
                 // Turn models on again
                 if (disableModelsRoutine != null)
                     StopCoroutine(disableModelsRoutine);
-                disableModelsRoutine = StartCoroutine(SwitchModelLayersAfterDelay(0f, 3));
+                disableModelsRoutine = StartCoroutine(SwitchModelLayersAfterDelay(0f, LayerMask.NameToLayer("Character")));
 
             }
             // If first person
@@ -274,7 +277,7 @@ namespace StarterAssets
                 // Turn models off
                 if (disableModelsRoutine != null)
                     StopCoroutine(disableModelsRoutine);
-                disableModelsRoutine = StartCoroutine(SwitchModelLayersAfterDelay(1f, 10));
+                disableModelsRoutine = StartCoroutine(SwitchModelLayersAfterDelay(1f, LayerMask.NameToLayer("Player" + (playerInput.playerIndex + 1))));
             }
         }
 

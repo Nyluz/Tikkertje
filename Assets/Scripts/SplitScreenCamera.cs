@@ -24,6 +24,12 @@ public class SplitScreenCamera : MonoBehaviour
 
         SetupCameraRect();
         SetupCinemachine();
+        SetupCullingMask();
+    }
+
+    public void SetupCullingMask()
+    {
+        cam.cullingMask = ~LayerMask.GetMask("Player" + (index + 1));
     }
 
     private void SetupCinemachine()
