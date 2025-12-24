@@ -82,7 +82,7 @@ namespace StarterAssets
         private float _fallTimeoutDelta;
         private float pitch;
 
-        private enum Modes
+        public enum Modes
         {
             firstPerson,
             thirdPerson
@@ -90,7 +90,7 @@ namespace StarterAssets
 
         private Modes previousMode;
 
-        private Modes mode()
+        public Modes mode()
         {
             if (ragdollScript.state == RagdollScript.State.Idle)
                 return Modes.firstPerson;

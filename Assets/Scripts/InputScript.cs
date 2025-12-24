@@ -66,7 +66,7 @@ namespace StarterAssets
         {
             var pi = GetComponent<PlayerInput>();
             foreach (var d in pi.devices)
-                Debug.Log($"Player {pi.playerIndex} device: {d.displayName}");
+                Debug.Log($"Player {pi.playerIndex} device: {d.device}");
         }
 
         private void Update()
