@@ -52,11 +52,11 @@ public class SplitScreenCamera : MonoBehaviour
         else if (totalPlayers == 3)
         {
             cam.rect = new Rect(
-                index == 0 ? 0 : (index == 1 ? 0.5f : 0),
-                index < 2 ? 0.5f : 0,
-                index < 2 ? 0.5f : 1,
+                (index % 2) * 0.5f,
+                index < 2 ? 0.5f : 0f,
+                0.5f,
                 0.5f
-                );
+            );
         }
         else
         {

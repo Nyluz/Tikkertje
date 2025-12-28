@@ -480,5 +480,10 @@ namespace StarterAssets
             axis.Recentering = recentering;
         }
 
+        public void Respawn()
+        {
+            print("Respawn");
+            GameManager.Instance.Spawn(playerInput, controller);
+        }
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class RagdollScript : MonoBehaviour
 {
-    [SerializeField] private CharacterController characterController;
+    private CharacterController characterController;
     private class BoneTransform
     {
         public Vector3 Position { get; set; }
@@ -189,6 +189,8 @@ public class RagdollScript : MonoBehaviour
     private void RagdollBehaviour()
     {
         fallTimer += Time.deltaTime;
+
+
 
         if (fallTimer >= timeToWakeUp)
         {

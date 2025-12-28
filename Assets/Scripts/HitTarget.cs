@@ -63,6 +63,8 @@ public class HitTarget : MonoBehaviour
                         Vector3 force = forceDirection * (slapForce + slapVelocity);
 
                         ragdoll.TriggerRagdoll(force, hitInfo.point);
+
+                        SoundManager.Instance.PlaySlap();
                     }
                     return;
                 }

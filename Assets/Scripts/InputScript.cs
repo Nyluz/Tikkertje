@@ -25,6 +25,7 @@ namespace StarterAssets
         private InputAction jumpAction;
         private InputAction slapAction;
         private InputAction sprintAction;
+        private InputAction escMenuAction;
 #endif
 
         [Header("Raw Input Values")]
@@ -40,6 +41,7 @@ namespace StarterAssets
         public bool jump;
         public bool slap;
         public bool sprint;
+        public bool escMenu;
 
         private void OnApplicationFocus(bool hasFocus)
         {
@@ -59,14 +61,8 @@ namespace StarterAssets
             jumpAction = actions.FindAction("Jump", true);
             slapAction = actions.FindAction("Slap", true);
             sprintAction = actions.FindAction("Sprint", true);
+            escMenuAction = actions.FindAction("EscMenu", true);
 #endif
-        }
-
-        private void Start()
-        {
-            var pi = GetComponent<PlayerInput>();
-            foreach (var d in pi.devices)
-                Debug.Log($"Player {pi.playerIndex} device: {d.device}");
         }
 
         private void Update()
@@ -83,6 +79,7 @@ namespace StarterAssets
             jump = jumpAction.WasPressedThisFrame();
             slap = slapAction.WasPressedThisFrame();
             sprint = sprintAction.IsPressed();
+            escMenu = escMenuAction.WasPressedThisFrame();
 #endif
         }
 

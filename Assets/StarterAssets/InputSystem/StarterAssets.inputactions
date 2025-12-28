@@ -50,6 +50,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "EscMenu",
+                    "type": "Button",
+                    "id": "5eadbf7d-0cb4-4202-82e0-103fa4698fa5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -248,6 +257,28 @@
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "Slap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "89f58b43-b128-4c63-8c25-ed81933a50a0",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "EscMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "802037d2-0a88-4939-84c2-8587ac31df66",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "EscMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

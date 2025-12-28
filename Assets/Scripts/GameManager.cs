@@ -6,12 +6,20 @@ using UnityEngine.InputSystem.Utilities;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     PlayerInputManager playerInputManager;
     public List<GameObject> players;
     public ReadOnlyArray<Gamepad> gamepads;
 
     public List<Transform> spawnPoints;
-    [SerializeField] private Camera mainCamera;
+    public Camera mainCamera;
+
+    public bool hasKeyboard = true;
+    public bool splitScreenStarted;
+
+    public GameObject blackScreen;
+    public GameObject splitscreenSelect;
 
     private void OnEnable()
     {
@@ -25,27 +33,37 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
         playerInputManager = GetComponent<PlayerInputManager>();
         playerInputManager.onPlayerJoined += HandlePlayerJoined;
     }
 
-    private void Start()
-    {
-        mainCamera.enabled = false;
-    }
-
     public void StartSplitscreen(int playerCount)
     {
+        blackScreen.SetActive(true);
+        splitscreenSelect.SetActive(false);
+
         var gamepads = Gamepad.all;
+        Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
 
         if (gamepads.Count < playerCount)
         {
             Debug.LogError("Not enough controllers connected");
             return;
         }
+
+        // Player 1
         if (playerCount >= 1)
         {
-            // Player 1
             PlayerInputManager.instance.JoinPlayer(
                 playerIndex: 0,
                 splitScreenIndex: 0,
@@ -53,9 +71,9 @@ public class GameManager : MonoBehaviour
                 pairWithDevice: gamepads[0]
             );
         }
+        // Player 2
         if (playerCount >= 2)
         {
-            // Player 2
             PlayerInputManager.instance.JoinPlayer(
                 playerIndex: 1,
                 splitScreenIndex: 1,
@@ -63,9 +81,9 @@ public class GameManager : MonoBehaviour
                 pairWithDevice: gamepads[1]
             );
         }
+        // Player 3
         if (playerCount >= 3)
         {
-            // Player 3
             PlayerInputManager.instance.JoinPlayer(
                 playerIndex: 2,
                 splitScreenIndex: 2,
@@ -73,9 +91,9 @@ public class GameManager : MonoBehaviour
                 pairWithDevice: gamepads[2]
             );
         }
+        // Player 4
         if (playerCount == 4)
         {
-            // Player 4
             PlayerInputManager.instance.JoinPlayer(
                 playerIndex: 3,
                 splitScreenIndex: 3,
@@ -83,32 +101,49 @@ public class GameManager : MonoBehaviour
                 pairWithDevice: gamepads[3]
             );
         }
+
+        splitScreenStarted = true;
     }
 
     private void HandlePlayerJoined(PlayerInput playerInput)
     {
         GameObject playerObject = playerInput.gameObject;
         int playerIndex = playerInput.playerIndex;
-        CharacterController playerController = playerObject.GetComponent<CharacterController>();
+        CharacterController characterController = playerObject.GetComponent<CharacterController>();
 
         // Add new player to player list
         players.Add(playerObject);
 
         // Assign controller to player
-        AssignController(Gamepad.all[playerIndex], playerInput);
+        if (playerInput.currentControlScheme == "Gamepad")
+            AssignController(Gamepad.all[playerIndex], playerInput);
+        else
+            print("keybaord end mous");
 
         // Give player spawn position and rotation
         if (playerIndex < spawnPoints.Count)
         {
-            playerController.enabled = false;
-            playerInput.transform.position = spawnPoints[playerIndex].localPosition;
-            playerInput.transform.rotation = spawnPoints[playerIndex].localRotation;
-            playerController.enabled = true;
+            Spawn(playerInput, characterController);
         }
 
         // Recalculate the splitscreens
         foreach (var player in players)
             player.GetComponentInChildren<SplitScreenCamera>().Setup();
+
+        if (players.Count == 3 && GameManager.Instance.mainCamera != null)
+        {
+            var mainCam = GameManager.Instance.mainCamera;
+            mainCam.enabled = true;
+            mainCam.rect = new Rect(0.5f, 0f, 0.5f, 0.5f);
+        }
+    }
+
+    public void Spawn(PlayerInput playerInput, CharacterController characterController)
+    {
+        characterController.enabled = false;
+        playerInput.transform.position = spawnPoints[playerInput.playerIndex].localPosition;
+        playerInput.transform.rotation = spawnPoints[playerInput.playerIndex].localRotation;
+        characterController.enabled = true;
     }
 
     public void AssignController(Gamepad gamepad, PlayerInput playerInput)
@@ -118,9 +153,6 @@ public class GameManager : MonoBehaviour
 
         // Pair this controller
         InputUser.PerformPairingWithDevice(gamepad, playerInput.user);
-
-        // Activate correct control scheme
-        playerInput.SwitchCurrentControlScheme(gamepad);
     }
 
     private void OnDeviceChange(InputDevice device, InputDeviceChange change)
