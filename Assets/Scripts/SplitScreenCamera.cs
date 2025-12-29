@@ -14,6 +14,9 @@ public class SplitScreenCamera : MonoBehaviour
     public int index;
     public int totalPlayers;
 
+    public SkinnedMeshRenderer Sweater;
+    public Material[] materials;
+
     public void Setup()
     {
         cam = GetComponent<Camera>();
@@ -25,6 +28,9 @@ public class SplitScreenCamera : MonoBehaviour
         SetupCameraRect();
         SetupCinemachine();
         SetupCullingMask();
+
+        transform.parent.gameObject.layer = LayerMask.NameToLayer("Player" + (index + 1));
+        Sweater.material = materials[index];
     }
 
     public void SetupCullingMask()

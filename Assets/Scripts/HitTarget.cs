@@ -1,5 +1,6 @@
 using StarterAssets;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class HitTarget : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class HitTarget : MonoBehaviour
     private CharacterController characterController;
     private PlayerUI playerUI;
     private InputScript input;
+    private PlayerInput playerInput;
 
     [SerializeField]
     public float slapForce;
@@ -32,24 +34,28 @@ public class HitTarget : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         input = GetComponent<InputScript>();
         playerUI = GetComponentInChildren<PlayerUI>();
+        playerInput = GetComponentInParent<PlayerInput>();
     }
 
     void Update()
     {
         velocity = characterController.velocity.magnitude;
-
-
         float distance = 0f;
+
+        int allPlayersMask =
+            LayerMask.GetMask("Player1", "Player2", "Player3", "Player4");
+
+        int myLayer = gameObject.layer;
+        LayerMask targetMask = allPlayersMask & ~(1 << myLayer);
 
         Ray ray = new Ray(player_camera.transform.position, player_camera.transform.forward);
 
-        if (Physics.Raycast(ray, out RaycastHit hitInfo))
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, targetMask))
         {
-            RagdollScript ragdoll = hitInfo.collider.GetComponentInParent<RagdollScript>();
+            RagdollScript ragdoll = hitInfo.collider.GetComponentInChildren<RagdollScript>();
             if (ragdoll != null)
             {
                 distance = Vector3.Distance(player_camera.transform.position, ragdoll.transform.position);
-
                 if (distance < tagDistance && ragdoll.tag == "Sheep")
                 {
                     playerUI.SetCrosshair(handTexture, 64);
@@ -64,7 +70,7 @@ public class HitTarget : MonoBehaviour
 
                         ragdoll.TriggerRagdoll(force, hitInfo.point);
 
-                        SoundManager.Instance.PlaySlap();
+                        SoundManager.PlaySound(transform, "event:/Slap");
                     }
                     return;
                 }

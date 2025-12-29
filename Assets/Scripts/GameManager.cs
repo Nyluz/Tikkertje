@@ -48,18 +48,16 @@ public class GameManager : MonoBehaviour
 
     public void StartSplitscreen(int playerCount)
     {
-        blackScreen.SetActive(true);
-        splitscreenSelect.SetActive(false);
-
         var gamepads = Gamepad.all;
-        Keyboard keyboard = Keyboard.current;
-        Mouse mouse = Mouse.current;
 
         if (gamepads.Count < playerCount)
         {
             Debug.LogError("Not enough controllers connected");
             return;
         }
+
+        blackScreen.SetActive(true);
+        splitscreenSelect.SetActive(false);
 
         // Player 1
         if (playerCount >= 1)

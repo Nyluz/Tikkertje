@@ -22,26 +22,16 @@ public class SoundManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
 
-    public void PlaySlap()
+    public static void PlaySound(Transform t, string eventName)
     {
-        audioSource.PlayOneShot(slapSound, .5f);
+        var evt = FMODUnity.RuntimeManager.CreateInstance(eventName);
+
+        evt.setListenerMask(0xFFFFFFFF);
+        //evt.setListenerMask(1u << playerIndex);
+        evt.set3DAttributes(
+            FMODUnity.RuntimeUtils.To3DAttributes(t)
+        );
+        evt.start();
+        evt.release();
     }
-
-    public void PlayImpactSound(Vector3 position)
-    {
-        var clip = ragdollImpacts[Random.Range(0, ragdollImpacts.Length)];
-
-        GameObject temp = new GameObject("ImpactSound");
-        temp.transform.position = position;
-
-        AudioSource source = temp.AddComponent<AudioSource>();
-        source.clip = clip;
-        source.pitch = Random.Range(0.65f, 1.35f); // pitch variation
-        source.spatialBlend = 1f; // 3D sound
-        source.Play();
-
-        Destroy(temp, clip.length / source.pitch);
-    }
-
-
 }

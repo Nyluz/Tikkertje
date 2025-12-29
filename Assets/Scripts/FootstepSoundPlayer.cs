@@ -17,8 +17,7 @@ public class FootstepSoundPlayer : MonoBehaviour
 
         if (lastFootstep > 0 && footstep < 0 || lastFootstep < 0 && footstep > 0)
         {
-            var randomClip = clips[Random.Range(0, clips.Length - 1)];
-            AudioSource.PlayClipAtPoint(randomClip, transform.position);
+            SoundManager.PlaySound(transform, "event:/Footsteps");
         }
 
         lastFootstep = footstep;

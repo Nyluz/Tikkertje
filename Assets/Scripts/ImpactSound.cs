@@ -16,7 +16,7 @@ public class ImpactSound : MonoBehaviour
 
         if (impactForce > impactThreshold)
         {
-            SoundManager.Instance.PlayImpactSound(transform.position);
+            //SoundManager.Instance.PlayImpactSound(transform.position);
             nextAllowedTime = Time.time + impactCooldown;
         }
     }
