@@ -78,6 +78,8 @@ namespace StarterAssets
         private InputScript input;
         private PlayerStats stats;
         private PlayerInput playerInput;
+        private AimAssist aimAssist;
+        private AimTargetCollector targetCollector;
 
         private float _fallTimeoutDelta;
         private float pitch;
@@ -127,6 +129,8 @@ namespace StarterAssets
             orbitalFollow = cameras[1].GetComponent<CinemachineOrbitalFollow>();
             stats = GetComponent<PlayerStats>();
             playerInput = GetComponent<PlayerInput>();
+            aimAssist = GetComponent<AimAssist>();
+            targetCollector = GetComponent<AimTargetCollector>();
         }
 
         private void Start()
@@ -196,23 +200,53 @@ namespace StarterAssets
 
         private void RotateFPSCamera()
         {
-            // Rotate player
+            // 1) Read raw stick input (same as before)
             Vector2 look = input.lookInput;
-            transform.Rotate(Vector3.up * look.x * yawSpeed * Time.deltaTime);
 
-            // Rotate camera
-            pitch -= look.y * pitchSpeed * Time.deltaTime;
-            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-            cameras[0].transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+            // Convert this frame’s input into the rotation you *would have applied*
+            float yawDelta = look.x * yawSpeed * Time.deltaTime;   // degrees
+            float pitchDelta = look.y * pitchSpeed * Time.deltaTime;   // degrees (your code subtracts)
 
-            // Rotate character head with camera angle
+            // 2) Predict the camera world rotation after applying raw input (don’t actually apply it yet)
+            Transform cam = cameras[0].transform;
+
+            float currentPitch = pitch; // pitch is your stored local pitch
+            float desiredPitch = Mathf.Clamp(currentPitch - pitchDelta, minPitch, maxPitch);
+
+            // World yaw is on the player body (transform). Pitch is local on the camera.
+            Quaternion desiredWorldYaw = Quaternion.Euler(0f, transform.eulerAngles.y + yawDelta, 0f);
+            Quaternion desiredCamPitch = Quaternion.Euler(desiredPitch, 0f, 0f);
+
+            // Compute desired aim direction in world space
+            Vector3 desiredAim = desiredWorldYaw * (desiredCamPitch * Vector3.forward);
+
+            // 3) Apply assist: replace desiredAim with assistedAim
+            List<Transform> targets = targetCollector != null ? targetCollector.targets : new List<Transform>();
+
+            Vector3 assistedAim = aimAssist.GetAssistedAim(desiredAim, ref targets);
+
+            // 4) Convert assistedAim back into yaw + pitch and apply (this is the “substitution”)
+            // Yaw: rotate player to face assisted direction on XZ plane
+            Vector3 flat = assistedAim;
+            flat.y = 0f;
+            if (flat.sqrMagnitude > 0.0001f)
+                transform.rotation = Quaternion.LookRotation(flat.normalized, Vector3.up);
+
+            // Pitch: angle up/down from assisted direction
+            float assistedPitch = -Mathf.Asin(Mathf.Clamp(assistedAim.normalized.y, -1f, 1f)) * Mathf.Rad2Deg;
+            pitch = Mathf.Clamp(assistedPitch, minPitch, maxPitch);
+            cam.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+
+            // 5) Your existing head-follow logic (unchanged)
             float x = currentCamera.transform.localEulerAngles.x;
             if (x > 180f) x -= 360f;
             x = Mathf.Clamp(x, headRotationClamp_min, headRotationClamp_max);
             Vector3 euler = head.localEulerAngles;
             euler.x = x;
             head.localEulerAngles = euler;
+
         }
+
 
         private void RagdollMode()
         {
@@ -444,6 +478,7 @@ namespace StarterAssets
         {
             // set sphere position, with offset
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+            GroundLayers = ~(1 << gameObject.layer);
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
         }
 

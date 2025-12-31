@@ -4,16 +4,17 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Camera))]
-public class SplitScreenCamera : MonoBehaviour
+public class SplitScreenSetup : MonoBehaviour
 {
     private CinemachineBrain cinemachineBrain;
+    private Camera cam;
+
     [SerializeField] private CinemachineCamera cinemachineFPSCamera;
     [SerializeField] private CinemachineCamera cinemachineThirdPersonCamera;
+    [HideInInspector] public int index;
+    [HideInInspector] public int totalPlayers;
 
-    private Camera cam;
-    public int index;
-    public int totalPlayers;
-
+    public GameObject skeleton;
     public SkinnedMeshRenderer Sweater;
     public Material[] materials;
 
@@ -29,7 +30,14 @@ public class SplitScreenCamera : MonoBehaviour
         SetupCinemachine();
         SetupCullingMask();
 
+        // 
         transform.parent.gameObject.layer = LayerMask.NameToLayer("Player" + (index + 1));
+
+        // Make rigidbodies not be able to trigger grounded
+        int layer = LayerMask.NameToLayer("Player" + (index + 1));
+        SetLayerRecursive(skeleton.transform, layer);
+
+        // Player color
         Sweater.material = materials[index];
     }
 
@@ -67,6 +75,16 @@ public class SplitScreenCamera : MonoBehaviour
         else
         {
             cam.rect = new Rect((index % 2) * 0.5f, (index < 2) ? 0.5f : 0f, 0.5f, 0.5f);
+        }
+    }
+
+    void SetLayerRecursive(Transform root, int layer)
+    {
+        root.gameObject.layer = layer;
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            SetLayerRecursive(root.GetChild(i), layer);
         }
     }
 }

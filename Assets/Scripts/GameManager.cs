@@ -16,20 +16,9 @@ public class GameManager : MonoBehaviour
     public Camera mainCamera;
 
     public bool hasKeyboard = true;
-    public bool splitScreenStarted;
 
     public GameObject blackScreen;
     public GameObject splitscreenSelect;
-
-    private void OnEnable()
-    {
-        InputSystem.onDeviceChange += OnDeviceChange;
-    }
-
-    private void OnDisable()
-    {
-        InputSystem.onDeviceChange -= OnDeviceChange;
-    }
 
     private void Awake()
     {
@@ -38,12 +27,18 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
-        DontDestroyOnLoad(gameObject);
 
         playerInputManager = GetComponent<PlayerInputManager>();
         playerInputManager.onPlayerJoined += HandlePlayerJoined;
+    }
+
+    private void Start()
+    {
+        if (GameSettings.Instance)
+        {
+            StartSplitscreen(GameSettings.Instance.playerAmount);
+        }
     }
 
     public void StartSplitscreen(int playerCount)
@@ -68,6 +63,8 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[0]
             );
+            Player player = new Player(0);
+            GameModeManager.Instance.players.Add(player);
         }
         // Player 2
         if (playerCount >= 2)
@@ -78,6 +75,8 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[1]
             );
+            Player player = new Player(1);
+            GameModeManager.Instance.players.Add(player);
         }
         // Player 3
         if (playerCount >= 3)
@@ -88,6 +87,8 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[2]
             );
+            Player player = new Player(2);
+            GameModeManager.Instance.players.Add(player);
         }
         // Player 4
         if (playerCount == 4)
@@ -98,9 +99,11 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[3]
             );
+            Player player = new Player(3);
+            GameModeManager.Instance.players.Add(player);
         }
 
-        splitScreenStarted = true;
+        GameModeManager.Instance.StartGame();
     }
 
     private void HandlePlayerJoined(PlayerInput playerInput)
@@ -126,11 +129,11 @@ public class GameManager : MonoBehaviour
 
         // Recalculate the splitscreens
         foreach (var player in players)
-            player.GetComponentInChildren<SplitScreenCamera>().Setup();
+            player.GetComponentInChildren<SplitScreenSetup>().Setup();
 
-        if (players.Count == 3 && GameManager.Instance.mainCamera != null)
+        if (players.Count == 3 && mainCamera != null)
         {
-            var mainCam = GameManager.Instance.mainCamera;
+            var mainCam = mainCamera;
             mainCam.enabled = true;
             mainCam.rect = new Rect(0.5f, 0f, 0.5f, 0.5f);
         }
@@ -153,18 +156,10 @@ public class GameManager : MonoBehaviour
         InputUser.PerformPairingWithDevice(gamepad, playerInput.user);
     }
 
-    private void OnDeviceChange(InputDevice device, InputDeviceChange change)
+    private void OnDestroy()
     {
-        if (device is Gamepad)
-        {
-            if (change == InputDeviceChange.Added)
-            {
-                //Debug.Log("Gamepad connected: " + device.displayName);
-            }
-            else if (change == InputDeviceChange.Removed)
-            {
-                //Debug.Log("Gamepad disconnected: " + device.displayName);
-            }
-        }
+        Destroy(GameSettings.Instance);
+        GameSettings.Instance = null;
     }
+
 }

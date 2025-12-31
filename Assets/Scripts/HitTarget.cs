@@ -25,8 +25,9 @@ public class HitTarget : MonoBehaviour
     [SerializeField] private float slapVelocity;
 
     [Header("Status")]
-    [SerializeField]
-    private float velocity;
+    [SerializeField] private float velocity;
+    [SerializeField] private bool tagAbility;
+
 
     void Awake()
     {
@@ -34,7 +35,7 @@ public class HitTarget : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         input = GetComponent<InputScript>();
         playerUI = GetComponentInChildren<PlayerUI>();
-        playerInput = GetComponentInParent<PlayerInput>();
+        playerInput = GetComponent<PlayerInput>();
     }
 
     void Update()
@@ -42,37 +43,53 @@ public class HitTarget : MonoBehaviour
         velocity = characterController.velocity.magnitude;
         float distance = 0f;
 
-        int allPlayersMask =
-            LayerMask.GetMask("Player1", "Player2", "Player3", "Player4");
+        int allPlayersMask = LayerMask.GetMask("Player1", "Player2", "Player3", "Player4");
 
         int myLayer = gameObject.layer;
         LayerMask targetMask = allPlayersMask & ~(1 << myLayer);
 
         Ray ray = new Ray(player_camera.transform.position, player_camera.transform.forward);
 
-        if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, targetMask))
+        Debug.DrawRay(
+            player_camera.transform.position,
+            player_camera.transform.forward * 10f,
+            Color.red
+        );
+
+        tagAbility = GameModeManager.Instance.players[playerInput.playerIndex].tagAbility;
+
+        if (tagAbility)
         {
-            RagdollScript ragdoll = hitInfo.collider.GetComponentInChildren<RagdollScript>();
-            if (ragdoll != null)
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, targetMask))
             {
-                distance = Vector3.Distance(player_camera.transform.position, ragdoll.transform.position);
-                if (distance < tagDistance && ragdoll.tag == "Sheep")
+                CharacterController controller = hitInfo.collider.GetComponentInChildren<CharacterController>();
+                if (controller != null)
                 {
-                    playerUI.SetCrosshair(handTexture, 64);
-                    if (input.slap)
+                    distance = Vector3.Distance(player_camera.transform.position, controller.transform.position);
+                    if (distance < tagDistance)
                     {
-                        Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
-                        forceDirection.y = 1;
-                        forceDirection.Normalize();
+                        playerUI.SetCrosshair(handTexture, 64);
+                        if (input.slap)
+                        {
+                            RagdollScript ragdoll = controller.GetComponentInChildren<RagdollScript>();
+                            Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
+                            forceDirection.y = 1;
+                            forceDirection.Normalize();
 
-                        slapVelocity = velocity * velocityMultiplier;
-                        Vector3 force = forceDirection * (slapForce + slapVelocity);
+                            slapVelocity = velocity * velocityMultiplier;
+                            Vector3 force = forceDirection * (slapForce + slapVelocity);
 
-                        ragdoll.TriggerRagdoll(force, hitInfo.point);
+                            ragdoll.TriggerRagdoll(force, hitInfo.point);
 
-                        SoundManager.PlaySound(transform, "event:/Slap");
+                            SoundManager.PlaySound(transform, "event:/Slap");
+
+                            // Get target player index
+                            int targetPlayerIndex = hitInfo.transform.gameObject.GetComponent<PlayerInput>().playerIndex;
+
+                            GameModeManager.Instance.SlapAction(playerInput.playerIndex, targetPlayerIndex);
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }

@@ -8,7 +8,7 @@ public class PlayerStats : MonoBehaviour
     public float bonusMaxStamina = 125f;
     public float staminaDrainRate = 15f;
     public float staminaGainRate = 10f;
-    public float bonusDelay = 5f;
+    public float activateBonusStaminaDelay = 5f;
 
     [Header("Stats")]
     public float currentStamina;
@@ -75,7 +75,7 @@ public class PlayerStats : MonoBehaviour
 
     private IEnumerator BonusTimer()
     {
-        yield return new WaitForSeconds(bonusDelay);
+        yield return new WaitForSeconds(activateBonusStaminaDelay);
 
         staminaBonus = true;     // unlocked
         bonusActive = true;      // capacity enabled

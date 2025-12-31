@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class FootstepSoundPlayer : MonoBehaviour
 {
-    public AudioClip[] clips;
     private Animator animator;
     private float lastFootstep;
 
