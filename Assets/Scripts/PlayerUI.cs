@@ -26,7 +26,10 @@ public class PlayerUI : MonoBehaviour
     public Color staminaHandleColorBonus;
 
     public Image crossHairImage;
-    public Image bolt;
+    public Image boltImage;
+    public Image infectedImage;
+    public Image lastmanImage;
+    public Image taggerImage;
     public GameObject EscMenu;
     public GameObject firstButton;
     public GameObject winText;
@@ -73,6 +76,15 @@ public class PlayerUI : MonoBehaviour
         else
             crossHairImage.enabled = true;
 
+        // Show tagger icon
+        taggerImage.gameObject.SetActive(GameModeManager.Instance.players[playerInput.playerIndex].tagger);
+
+        // Show infected icon
+        infectedImage.gameObject.SetActive(GameModeManager.Instance.players[playerInput.playerIndex].infected);
+
+        // Show lastman icon
+        lastmanImage.gameObject.SetActive(GameModeManager.Instance.players[playerInput.playerIndex].lastman);
+
         // Esc menu
         if (input.escMenu)
             ToggleEscMenu();
@@ -94,13 +106,13 @@ public class PlayerUI : MonoBehaviour
         {
             staminaFillImage.color = staminaFillColorBonus;
             staminaHandleImage.color = staminaHandleColorBonus;
-            bolt.enabled = true;
+            boltImage.enabled = true;
         }
         else
         {
             staminaFillImage.color = staminaFillColor;
             staminaHandleImage.color = staminaHandleColor;
-            bolt.enabled = false;
+            boltImage.enabled = false;
         }
     }
 
