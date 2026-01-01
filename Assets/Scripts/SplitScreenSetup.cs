@@ -30,9 +30,6 @@ public class SplitScreenSetup : MonoBehaviour
         SetupCinemachine();
         SetupCullingMask();
 
-        // 
-        transform.parent.gameObject.layer = LayerMask.NameToLayer("Player" + (index + 1));
-
         // Make rigidbodies not be able to trigger grounded
         int layer = LayerMask.NameToLayer("Player" + (index + 1));
         SetLayerRecursive(skeleton.transform, layer);

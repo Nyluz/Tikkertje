@@ -3,10 +3,6 @@ using UnityEngine;
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
-    private AudioSource audioSource;
-
-    public AudioClip slapSound;
-    public AudioClip[] ragdollImpacts;
 
     private void Awake()
     {
@@ -17,9 +13,6 @@ public class SoundManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        audioSource = GetComponent<AudioSource>();
     }
 
     public static void PlaySound(Transform t, string eventName)

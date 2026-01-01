@@ -43,10 +43,7 @@ public class HitTarget : MonoBehaviour
         velocity = characterController.velocity.magnitude;
         float distance = 0f;
 
-        int allPlayersMask = LayerMask.GetMask("Player1", "Player2", "Player3", "Player4");
-
-        int myLayer = gameObject.layer;
-        LayerMask targetMask = allPlayersMask & ~(1 << myLayer);
+        int layers = LayerMask.GetMask("PlayerCollider");
 
         Ray ray = new Ray(player_camera.transform.position, player_camera.transform.forward);
 
@@ -60,7 +57,7 @@ public class HitTarget : MonoBehaviour
 
         if (tagAbility)
         {
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, targetMask))
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, layers))
             {
                 CharacterController controller = hitInfo.collider.GetComponentInChildren<CharacterController>();
                 if (controller != null)
@@ -68,7 +65,7 @@ public class HitTarget : MonoBehaviour
                     distance = Vector3.Distance(player_camera.transform.position, controller.transform.position);
                     if (distance < tagDistance)
                     {
-                        playerUI.SetCrosshair(handTexture, 64);
+                        playerUI.SetCrosshair(handTexture, 128);
                         if (input.slap)
                         {
                             RagdollScript ragdoll = controller.GetComponentInChildren<RagdollScript>();

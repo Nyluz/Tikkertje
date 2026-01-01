@@ -9,12 +9,15 @@ public class MenuLabel : MonoBehaviour
     public TextMeshProUGUI descriptionText;
     public TextMeshProUGUI valueText;
 
-    public void SetValue(string value)
+    public void SetValue(string value, string description = "")
     {
         this.value = value;
 
-        descriptionText.text = description;
-        valueText.text = value;
+        if (description != "")
+            this.description = description;
 
+        descriptionText.text = this.description;
+
+        valueText.text = value;
     }
 }

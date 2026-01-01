@@ -17,7 +17,6 @@ public class GameManager : MonoBehaviour
 
     public bool hasKeyboard = true;
 
-    public GameObject blackScreen;
     public GameObject splitscreenSelect;
 
     private void Awake()
@@ -39,6 +38,10 @@ public class GameManager : MonoBehaviour
         {
             StartSplitscreen(GameSettings.Instance.playerAmount);
         }
+        else
+        {
+            StartSplitscreen(1);
+        }
     }
 
     public void StartSplitscreen(int playerCount)
@@ -51,8 +54,17 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        blackScreen.SetActive(true);
         splitscreenSelect.SetActive(false);
+
+        // Fresh game
+        if (!GameModeManager.Instance.gameStarted)
+        {
+            for (int i = 0; i < playerCount; i++)
+            {
+                Player player = new Player(i);
+                GameModeManager.Instance.players.Add(player);
+            }
+        }
 
         // Player 1
         if (playerCount >= 1)
@@ -63,8 +75,6 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[0]
             );
-            Player player = new Player(0);
-            GameModeManager.Instance.players.Add(player);
         }
         // Player 2
         if (playerCount >= 2)
@@ -75,8 +85,6 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[1]
             );
-            Player player = new Player(1);
-            GameModeManager.Instance.players.Add(player);
         }
         // Player 3
         if (playerCount >= 3)
@@ -87,8 +95,6 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[2]
             );
-            Player player = new Player(2);
-            GameModeManager.Instance.players.Add(player);
         }
         // Player 4
         if (playerCount == 4)
@@ -99,8 +105,6 @@ public class GameManager : MonoBehaviour
                 controlScheme: "Gamepad",
                 pairWithDevice: gamepads[3]
             );
-            Player player = new Player(3);
-            GameModeManager.Instance.players.Add(player);
         }
 
         GameModeManager.Instance.StartGame();
@@ -155,11 +159,4 @@ public class GameManager : MonoBehaviour
         // Pair this controller
         InputUser.PerformPairingWithDevice(gamepad, playerInput.user);
     }
-
-    private void OnDestroy()
-    {
-        Destroy(GameSettings.Instance);
-        GameSettings.Instance = null;
-    }
-
 }

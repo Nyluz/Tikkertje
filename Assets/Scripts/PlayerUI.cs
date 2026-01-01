@@ -1,11 +1,11 @@
 using StarterAssets;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerUI : MonoBehaviour
@@ -16,9 +16,9 @@ public class PlayerUI : MonoBehaviour
 
     private PlayerStats stats;
     private FirstPersonController firstPersonController;
+
     private InputScript input;
     private PlayerInput playerInput;
-    private EventSystem eventSystem;
 
     public Color staminaFillColor;
     public Color staminaFillColorBonus;
@@ -32,7 +32,8 @@ public class PlayerUI : MonoBehaviour
     public Image taggerImage;
     public GameObject EscMenu;
     public GameObject firstButton;
-    public GameObject winText;
+    public GameObject gameWinText;
+    public GameObject roundWinText;
 
     public TextMeshProUGUI timerText;
     public List<MenuLabel> playerScoreLabel;
@@ -63,10 +64,17 @@ public class PlayerUI : MonoBehaviour
             timerText.gameObject.SetActive(false);
         }
 
-        // Player scores
-        for (int i = 0; i < GameModeManager.Instance.players.Count; i++)
+        if (GameModeManager.Instance.roundFinished || GameModeManager.Instance.gameFinished)
         {
-            playerScoreLabel[i].SetValue(GameModeManager.Instance.players[i].Score.ToString());
+            timerText.gameObject.SetActive(false);
+        }
+
+        // Player scores
+        for (int i = 0; i < GameModeManager.Instance.sortedPlayers.Count; i++)
+        {
+            var player = GameModeManager.Instance.sortedPlayers[i];
+
+            playerScoreLabel[i].SetValue(player.roundScore.ToString(), $"Player {player.index + 1}");
             playerScoreLabel[i].gameObject.SetActive(true);
         }
 
@@ -89,8 +97,11 @@ public class PlayerUI : MonoBehaviour
         if (input.escMenu)
             ToggleEscMenu();
 
-        // Win text 
-        winText.SetActive(GameModeManager.Instance.winningPlayers.Contains(playerInput.playerIndex));
+        // Round win text
+        roundWinText.SetActive(GameModeManager.Instance.roundWinningPlayers.Contains(playerInput.playerIndex));
+
+        // Game win text 
+        gameWinText.SetActive(GameModeManager.Instance.gameWinningPlayers.Contains(playerInput.playerIndex));
     }
 
     public void SetCrosshair(Sprite sprite, int size)
@@ -118,15 +129,28 @@ public class PlayerUI : MonoBehaviour
 
     public void ToggleEscMenu()
     {
-        EscMenu.SetActive(!EscMenu.activeSelf);
-        Time.timeScale = EscMenu.activeSelf ? 0f : 1f;
+        bool opening = !EscMenu.activeSelf;
+
+        EscMenu.SetActive(opening);
+        Time.timeScale = opening ? 0f : 1f;
+
         EventSystem.current.SetSelectedGameObject(firstButton);
+
+        if (!opening)
+            StartCoroutine(UnblockJumpNextFrame());
+    }
+
+    IEnumerator UnblockJumpNextFrame()
+    {
+        firstPersonController.blockJumpInput = true;
+        yield return null;
+        firstPersonController.blockJumpInput = false;
     }
 
     public void BackToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadSceneAsync("Menu");
+        SceneSwitcher.ReturnToMenu();
     }
 
 }
