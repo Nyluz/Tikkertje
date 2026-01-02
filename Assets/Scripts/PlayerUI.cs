@@ -1,6 +1,5 @@
 using StarterAssets;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -36,7 +35,8 @@ public class PlayerUI : MonoBehaviour
     public GameObject roundWinText;
 
     public TextMeshProUGUI timerText;
-    public List<MenuLabel> playerScoreLabel;
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI scoreUnitText;
 
     private void Awake()
     {
@@ -52,30 +52,29 @@ public class PlayerUI : MonoBehaviour
         SetStamina(stats.currentStamina);
 
         // Game timer
-        if (GameModeManager.Instance.timeBased)
+        if (GameModeManager.Instance.roundFinished || GameModeManager.Instance.gameFinished)
+        {
+            timerText.gameObject.SetActive(false);
+        }
+        else
         {
             float t = GameModeManager.Instance.playTimeLeft;
             int minutes = Mathf.FloorToInt(t / 60f);
             int seconds = Mathf.FloorToInt(t % 60f);
             timerText.text = $"{minutes}:{seconds:00}";
         }
-        else
+
+        // Score text
+        if (GameModeManager.Instance.gameMode == GameMode.Tag)
         {
-            timerText.gameObject.SetActive(false);
+            scoreText.text = GameModeManager.Instance.players[playerInput.playerIndex].score.ToString();
+            scoreUnitText.text = "Lives";
         }
 
-        if (GameModeManager.Instance.roundFinished || GameModeManager.Instance.gameFinished)
+        if (GameModeManager.Instance.gameMode == GameMode.Infection)
         {
-            timerText.gameObject.SetActive(false);
-        }
-
-        // Player scores
-        for (int i = 0; i < GameModeManager.Instance.sortedPlayers.Count; i++)
-        {
-            var player = GameModeManager.Instance.sortedPlayers[i];
-
-            playerScoreLabel[i].SetValue(player.roundScore.ToString(), $"Player {player.index + 1}");
-            playerScoreLabel[i].gameObject.SetActive(true);
+            scoreText.text = GameModeManager.Instance.players[playerInput.playerIndex].roundScore.ToString();
+            scoreUnitText.text = "Score";
         }
 
         // Crosshair only in FPS mode

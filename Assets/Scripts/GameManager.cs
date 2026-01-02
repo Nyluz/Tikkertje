@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
@@ -8,16 +9,15 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    PlayerInputManager playerInputManager;
+    private PlayerInputManager playerInputManager;
     public List<GameObject> players;
     public ReadOnlyArray<Gamepad> gamepads;
 
     public List<Transform> spawnPoints;
     public Camera mainCamera;
+    public Transform ScoreBoard;
 
     public bool hasKeyboard = true;
-
-    public GameObject splitscreenSelect;
 
     private void Awake()
     {
@@ -28,8 +28,19 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
 
-        playerInputManager = GetComponent<PlayerInputManager>();
+        playerInputManager = FindAnyObjectByType<PlayerInputManager>();
         playerInputManager.onPlayerJoined += HandlePlayerJoined;
+
+        spawnPoints = FindObjectsByType<Spawnpoint>(
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None
+        ).Select(sp => sp.transform).ToList();
+        foreach (var spawnpoint in spawnPoints)
+        {
+            spawnpoint.gameObject.SetActive(false);
+        }
+
+        Application.targetFrameRate = 60;
     }
 
     private void Start()
@@ -53,8 +64,6 @@ public class GameManager : MonoBehaviour
             Debug.LogError("Not enough controllers connected");
             return;
         }
-
-        splitscreenSelect.SetActive(false);
 
         // Fresh game
         if (!GameModeManager.Instance.gameStarted)
@@ -135,6 +144,7 @@ public class GameManager : MonoBehaviour
         foreach (var player in players)
             player.GetComponentInChildren<SplitScreenSetup>().Setup();
 
+        // Black screen with 3 players
         if (players.Count == 3 && mainCamera != null)
         {
             var mainCam = mainCamera;
@@ -146,7 +156,7 @@ public class GameManager : MonoBehaviour
     public void Spawn(PlayerInput playerInput, CharacterController characterController)
     {
         characterController.enabled = false;
-        playerInput.transform.position = spawnPoints[playerInput.playerIndex].localPosition;
+        playerInput.transform.position = spawnPoints[playerInput.playerIndex].position;
         playerInput.transform.rotation = spawnPoints[playerInput.playerIndex].localRotation;
         characterController.enabled = true;
     }

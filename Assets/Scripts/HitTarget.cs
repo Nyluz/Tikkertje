@@ -62,6 +62,13 @@ public class HitTarget : MonoBehaviour
                 CharacterController controller = hitInfo.collider.GetComponentInChildren<CharacterController>();
                 if (controller != null)
                 {
+                    // Get target player index
+                    int targetPlayerIndex = hitInfo.transform.gameObject.GetComponent<PlayerInput>().playerIndex;
+
+                    // Check for player without tag ability
+                    if (GameModeManager.Instance.players[targetPlayerIndex].tagAbility)
+                        return;
+
                     distance = Vector3.Distance(player_camera.transform.position, controller.transform.position);
                     if (distance < tagDistance)
                     {
@@ -80,8 +87,7 @@ public class HitTarget : MonoBehaviour
 
                             SoundManager.PlaySound(transform, "event:/Slap");
 
-                            // Get target player index
-                            int targetPlayerIndex = hitInfo.transform.gameObject.GetComponent<PlayerInput>().playerIndex;
+
 
                             GameModeManager.Instance.SlapAction(playerInput.playerIndex, targetPlayerIndex);
                         }

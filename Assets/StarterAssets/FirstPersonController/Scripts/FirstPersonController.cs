@@ -139,7 +139,8 @@ namespace StarterAssets
             SwitchCamera(cameras[0]);
             _fallTimeoutDelta = FallTimeout;
             controller.sharedMaterial = colliderMaterial;
-            Application.targetFrameRate = 60;
+
+            DisableModels(LayerMask.NameToLayer("Player" + (playerInput.playerIndex + 1)));
         }
 
         private void Update()
@@ -319,7 +320,11 @@ namespace StarterAssets
         IEnumerator SwitchModelLayersAfterDelay(float delay, int layer)
         {
             yield return new WaitForSeconds(delay);
+            DisableModels(layer);
+        }
 
+        public void DisableModels(int layer)
+        {
             foreach (var model in firstPersonHideModels)
             {
                 model.layer = layer;
@@ -477,9 +482,8 @@ namespace StarterAssets
 
         private void GroundedCheck()
         {
-            // set sphere position, with offset
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-            GroundLayers = ~(1 << gameObject.layer);
+            GroundLayers = ~LayerMask.GetMask("Player" + (playerInput.playerIndex + 1));
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
         }
 

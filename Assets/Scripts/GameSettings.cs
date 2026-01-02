@@ -1,11 +1,5 @@
 using UnityEngine;
 
-public enum GameMode
-{
-    Tag,
-    Infection
-}
-
 public class GameSettings : MonoBehaviour
 {
     public static GameSettings Instance;
@@ -14,6 +8,15 @@ public class GameSettings : MonoBehaviour
     public int playerAmount = 0;
     public GameMode gameMode;
     public string map;
+
+    [Header("Tag Settings")]
+    public int tagLives;
+    public int tagTime;
+
+    [Header("Infection Settings")]
+    public int rounds;
+    public int roundDuration;
+    public int laststandTime;
 
     private void Awake()
     {
@@ -26,5 +29,4 @@ public class GameSettings : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
 }

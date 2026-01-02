@@ -16,7 +16,13 @@ public class AimTargetCollector : MonoBehaviour
         if (!GameModeManager.Instance.players[playerInput.playerIndex].tagAbility)
             return;
 
-        // Pick your own rule: tag, layer, component, etc.
+        var target = other.gameObject.GetComponent<PlayerInput>();
+        if (target)
+        {
+            if (GameModeManager.Instance.players[target.playerIndex].tagAbility)
+                return;
+        }
+
         if (other.name == "Player(Clone)" && other.gameObject != gameObject)
         {
             var t = other.transform;

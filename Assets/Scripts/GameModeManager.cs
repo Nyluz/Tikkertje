@@ -4,19 +4,25 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public enum GameMode
+{
+    Tag,
+    Infection
+}
+
 public class GameModeManager : MonoBehaviour
 {
     public static GameModeManager Instance;
     public GameMode gameMode;
 
-    [Header("General Config")]
-    public bool timeBased = false;
-    public int playTime = 1;
-    public int lastStandTime = 1;
-    public int playPoints = 5;
+    [Header("Tag Config")]
+    public int tagTime = 10;
+    public int tagLives = 10;
 
     [Header("Infection config")]
-    public int maxRounds = 3;
+    public int rounds = 3;
+    public int roundDuration = 3;
+    public int laststandTime = 1;
 
     [Header("General State")]
     public float playTimeLeft;
@@ -37,7 +43,7 @@ public class GameModeManager : MonoBehaviour
     private Coroutine scoreTickRoutine;
     public List<Player> players = new List<Player>();
     public List<Player> sortedPlayers = new List<Player>();
-    private float endDelay = 10f;
+    private float endDelay = 9;
 
     private void Awake()
     {
@@ -48,11 +54,19 @@ public class GameModeManager : MonoBehaviour
         }
 
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
 
         if (GameSettings.Instance)
         {
             gameMode = GameSettings.Instance.gameMode;
+
+            tagLives = GameSettings.Instance.tagLives;
+            tagTime = GameSettings.Instance.tagTime;
+
+            rounds = GameSettings.Instance.rounds;
+            roundDuration = GameSettings.Instance.roundDuration;
+            laststandTime = GameSettings.Instance.laststandTime;
         }
     }
     public void StartGame()
@@ -61,10 +75,9 @@ public class GameModeManager : MonoBehaviour
 
         scoreTickRoutine = StartCoroutine(ScoreTick());
 
-        if (timeBased)
-            StartTimer();
+        StartTimer();
 
-        // Random player has Tag ability
+        // Give first player
         players[nextInfected].GainTagAbility(gameMode);
     }
 
@@ -77,37 +90,21 @@ public class GameModeManager : MonoBehaviour
 
         if (gameMode == GameMode.Tag)
         {
-            // Score based logic
-            if (!timeBased)
+            foreach (Player player in players)
             {
-                foreach (Player player in players)
-                {
-                    if (player.score == 0 && !gameFinished)
-                    {
-                        gameFinished = true;
-                        CalculateGameWinner();
-                    }
-                }
-            }
-            // Time based logic
-            else
-            {
-                if (gameTimerFinished && !gameFinished)
+                if (player.score == 0 || gameTimerFinished && !gameFinished)
                 {
                     gameFinished = true;
                     CalculateGameWinner();
                 }
             }
         }
-
         if (gameMode == GameMode.Infection)
         {
-            timeBased = true;
-
             if (IsLastManStanding() && !lastStand)
             {
                 lastStand = true;
-                playTimeLeft = minuteToSeconds(lastStandTime);
+                playTimeLeft = minuteToSeconds(laststandTime);
 
             }
             else if (IsLastManStanding())
@@ -117,12 +114,14 @@ public class GameModeManager : MonoBehaviour
 
             if (roundFinished && !calculateWinner)
             {
+                finishedRounds++;
+
                 foreach (var player in players)
                 {
                     player.AddRoundScore();
                 }
 
-                if (finishedRounds == maxRounds)
+                if (finishedRounds == rounds)
                     CalculateGameWinner();
                 else
                     CalculateRoundWinner();
@@ -133,13 +132,8 @@ public class GameModeManager : MonoBehaviour
             {
                 roundFinished = true;
 
-                if (gameMode == GameMode.Infection)
-                {
-                    roundFinished = true;
-
-                    if (finishedRounds == maxRounds)
-                        gameFinished = true;
-                }
+                if (finishedRounds == rounds)
+                    gameFinished = true;
 
                 foreach (var player in players)
                 {
@@ -154,6 +148,12 @@ public class GameModeManager : MonoBehaviour
                 }
             }
         }
+
+        if (roundFinished)
+            foreach (var player in players)
+            {
+                player.tagAbility = false;
+            }
     }
 
     public void CalculateGameWinner()
@@ -170,8 +170,8 @@ public class GameModeManager : MonoBehaviour
     {
         StopTimer();
         calculateWinner = true;
-        int maxScore = players.Max(p => p.score);
-        roundWinningPlayers = players.Where(p => p.score == maxScore).Select(p => p.index).ToArray();
+        int maxScore = players.Max(p => p.roundScore);
+        roundWinningPlayers = players.Where(p => p.roundScore == maxScore).Select(p => p.index).ToArray();
 
         StartCoroutine(ReloadScene());
     }
@@ -205,7 +205,7 @@ public class GameModeManager : MonoBehaviour
 
     private IEnumerator Timer()
     {
-        playTimeLeft = minuteToSeconds(playTime);
+        playTimeLeft = minuteToSeconds(tagTime);
 
         while (playTimeLeft > 0f)
         {
@@ -246,6 +246,19 @@ public class GameModeManager : MonoBehaviour
         }
     }
 
+    public void ShowScoreBoard()
+    {
+        // Remove players to reveal score board screen
+        foreach (var player in GameManager.Instance.players)
+        {
+            if (player != null)
+                Destroy(player);
+        }
+
+        GameManager.Instance.players.Clear();
+        GameManager.Instance.ScoreBoard.gameObject.SetActive(true);
+    }
+
     IEnumerator ScoreTick()
     {
         while (true)
@@ -258,12 +271,21 @@ public class GameModeManager : MonoBehaviour
 
     IEnumerator ReturnToMenu()
     {
+        yield return new WaitForSeconds(3);
+
+        ShowScoreBoard();
+
         yield return new WaitForSeconds(endDelay);
+
         SceneSwitcher.ReturnToMenu();
     }
 
     IEnumerator ReloadScene()
     {
+        yield return new WaitForSeconds(3);
+
+        ShowScoreBoard();
+
         yield return new WaitForSeconds(endDelay);
 
         // Reset player stats
@@ -278,7 +300,6 @@ public class GameModeManager : MonoBehaviour
         gameTimerFinished = false;
         calculateWinner = false;
 
-        finishedRounds++;
         nextInfected++;
         if (nextInfected == players.Count)
             nextInfected = 0;
@@ -291,18 +312,35 @@ public class GameModeManager : MonoBehaviour
         return minute * 60;
     }
 
-    public void ChangeColor(int index, bool tagger)
+    public IEnumerator LerpMaterialColor(Renderer renderer, Material fromMat, Material toMat, float duration)
+    {
+        Material mat = renderer.material;
+        Color from = fromMat.color;
+        Color to = toMat.color;
+
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            mat.color = Color.Lerp(from, to, t);
+            yield return null;
+        }
+
+        mat.color = to;
+    }
+
+    public void ChangeToColor(int index, bool tagger)
     {
         if (tagger)
-        {
-            GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().Sweater.material =
-                GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().materials[4];
-        }
+            StartCoroutine(LerpMaterialColor(GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().Sweater,
+                GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().materials[index],
+                GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().materials[4],
+                3f));
         else
-        {
-            GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().Sweater.material =
-                GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().materials[index];
-        }
+            StartCoroutine(LerpMaterialColor(GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().Sweater,
+                GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().materials[4],
+                GameManager.Instance.players[index].GetComponentInChildren<SplitScreenSetup>().materials[index],
+                3f));
     }
 }
 
@@ -320,7 +358,16 @@ public class Player
     public Player(int index)
     {
         this.index = index;
-        score = 5;
+
+        if (GameSettings.Instance)
+        {
+            if (GameSettings.Instance.gameMode == GameMode.Tag)
+            {
+                score = GameModeManager.Instance.tagLives;
+            }
+        }
+        else
+            score = 1;
     }
 
     public void AddScore(int amount)
@@ -348,7 +395,7 @@ public class Player
         if (gameMode == GameMode.Infection)
             infected = true;
 
-        GameModeManager.Instance.ChangeColor(index, true);
+        GameModeManager.Instance.ChangeToColor(index, true);
     }
 
     public void LoseTagAbility(GameMode gameMode)
@@ -358,7 +405,7 @@ public class Player
         if (gameMode == GameMode.Tag)
             tagger = false;
 
-        GameModeManager.Instance.ChangeColor(index, false);
+        GameModeManager.Instance.ChangeToColor(index, false);
     }
 
     public void ResetStats()
