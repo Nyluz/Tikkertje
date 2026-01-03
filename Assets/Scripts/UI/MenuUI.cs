@@ -29,6 +29,11 @@ public class MenuUI : MonoBehaviour
     [Header("PlayerButtons")]
     public List<Button> PlayerButtons;
 
+    private void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
+
     private void Start()
     {
         EventSystem.current.SetSelectedGameObject(firstSelectedGameObject);
