@@ -44,6 +44,7 @@ public class BombScript : MonoBehaviour
         }
 
         GameObject explosion = Instantiate(particle, transform.position, Quaternion.identity);
+        SoundManager.Instance.StopFuse();
         SoundManager.PlaySound(transform, "event:/Explosion");
     }
 

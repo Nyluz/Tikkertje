@@ -18,6 +18,6 @@ public class ScorePanel : MonoBehaviour
             playerScoreLabel[i].gameObject.SetActive(true);
         }
 
-        roundText.text = "Round: " + GameModeManager.Instance.finishedRounds + "/" + GameSettings.Instance.rounds;
+        roundText.text = "Round: " + GameModeManager.Instance.finishedRounds + "/" + GameModeManager.Instance.rounds;
     }
 }

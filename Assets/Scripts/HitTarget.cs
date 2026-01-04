@@ -111,8 +111,7 @@ public class HitTarget : MonoBehaviour
                         {
                             input.slap = false;
 
-                            GameModeManager.Instance.ObtainBomb(playerInput.playerIndex);
-                            GameModeManager.Instance.playTimeLeft = GameModeManager.minuteToSeconds(GameModeManager.Instance.fuseTime);
+                            GameModeManager.Instance.StartBomb(playerInput.playerIndex);
                             SoundManager.PlaySound(transform, "event:/Slap");
                             hitInfo.collider.gameObject.SetActive(false);
                         }

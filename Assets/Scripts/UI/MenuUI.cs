@@ -144,6 +144,13 @@ public class MenuUI : MonoBehaviour
             nav.selectOnDown = roundsSlider.slider;
             infectionButton.navigation = nav;
         }
+
+        if (GameSettings.Instance.gameMode == GameMode.Bomb)
+        {
+            var nav = infectionButton.navigation;
+            nav.selectOnDown = bombFuseTimeSlider.slider;
+            infectionButton.navigation = nav;
+        }
     }
 
     public void StartGame()

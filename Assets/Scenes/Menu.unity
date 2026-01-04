@@ -2284,7 +2284,7 @@ PrefabInstance:
     - target: {fileID: 5187928078619534053, guid: f45e6d58f6724924f94933df862a4df9, type: 3}
       propertyPath: m_Navigation.m_SelectOnUp
       value: 
-      objectReference: {fileID: 943486848}
+      objectReference: {fileID: 1270111997}
     - target: {fileID: 5187928078619534053, guid: f45e6d58f6724924f94933df862a4df9, type: 3}
       propertyPath: m_Navigation.m_SelectOnDown
       value: 
@@ -4244,7 +4244,7 @@ MonoBehaviour:
   bombSettingsPanel: {fileID: 515717042}
   bombLivesSlider: {fileID: 1557706864}
   bombFuseTimeSlider: {fileID: 1825135694}
-  bombRoundsSlider: {fileID: 0}
+  bombRoundsSlider: {fileID: 1615465242}
   infectionButton: {fileID: 1270111997}
   PlayerButtons:
   - {fileID: 1974660635}
@@ -5170,6 +5170,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1566798142}
   m_CullTransparentMesh: 1
+--- !u!114 &1615465242 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7390867682243680218, guid: f45e6d58f6724924f94933df862a4df9, type: 3}
+  m_PrefabInstance: {fileID: 1220421318}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1274d3487e917ab4bbcc5c90066137ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SettingSlider
 --- !u!1 &1691591894
 GameObject:
   m_ObjectHideFlags: 0
@@ -6750,7 +6761,7 @@ PrefabInstance:
     - target: {fileID: 5187928078619534053, guid: f45e6d58f6724924f94933df862a4df9, type: 3}
       propertyPath: m_Navigation.m_SelectOnUp
       value: 
-      objectReference: {fileID: 943486848}
+      objectReference: {fileID: 1270111997}
     - target: {fileID: 5187928078619534053, guid: f45e6d58f6724924f94933df862a4df9, type: 3}
       propertyPath: m_Navigation.m_SelectOnDown
       value: 

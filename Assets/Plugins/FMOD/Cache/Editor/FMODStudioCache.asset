@@ -15,7 +15,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.assets.bank
   Name: Master.assets
   StudioPath: bank:/Master.assets
-  lastModified: 639031427752615637
+  lastModified: 639031596902988257
   FileSizes: []
   Exists: 1
 --- !u!114 &-6835995797755928925
@@ -33,7 +33,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639031427751194102
+  lastModified: 639031596902816890
   FileSizes: []
   Exists: 1
 --- !u!114 &-5839534477738484729
@@ -79,7 +79,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/PlayerSounds.assets.bank
   Name: PlayerSounds.assets
   StudioPath: bank:/PlayerSounds.assets
-  lastModified: 639031349720693581
+  lastModified: 639031600093128899
   FileSizes: []
   Exists: 1
 --- !u!114 &11400000
@@ -104,12 +104,13 @@ MonoBehaviour:
   - {fileID: 5279796052152718753}
   - {fileID: -5839534477738484729}
   - {fileID: 2386118347784478587}
+  - {fileID: 8150790600411526557}
   EditorParameters: []
   MasterBanks:
   - {fileID: -6835995797755928925}
   StringsBanks:
   - {fileID: 4033303236510453226}
-  cacheTime: 639031427752625540
+  cacheTime: 639031600093128899
   cacheVersion: 131634
 --- !u!114 &2386118347784478587
 MonoBehaviour:
@@ -153,10 +154,10 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639031427752625540
+  lastModified: 639031596903008275
   FileSizes:
   - Name: 
-    Value: 1052
+    Value: 1098
   Exists: 1
 --- !u!114 &5279796052152718753
 MonoBehaviour:
@@ -200,7 +201,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/PlayerSounds.bank
   Name: PlayerSounds
   StudioPath: bank:/PlayerSounds
-  lastModified: 639031349720454878
+  lastModified: 639031600092426686
   FileSizes: []
   Exists: 1
 --- !u!114 &7664504137336753460
@@ -228,3 +229,30 @@ MonoBehaviour:
   Labels:
   - Rock
   Exists: 1
+--- !u!114 &8150790600411526557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Fuse
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Fuse
+  Guid:
+    Data1: -909384307
+    Data2: 1315643977
+    Data3: -1157796693
+    Data4: -364025057
+  Banks:
+  - {fileID: 5619342368163106305}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 2250

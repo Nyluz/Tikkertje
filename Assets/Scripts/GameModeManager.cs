@@ -204,6 +204,13 @@ public class GameModeManager : MonoBehaviour
         }
     }
 
+    public void StartBomb(int playerIndex)
+    {
+        ObtainBomb(playerIndex);
+        playTimeLeft = 3;
+        SoundManager.Instance.StartFuse();
+    }
+
     public void ObtainBomb(int playerIndex)
     {
         playTimeLeft += 10;
