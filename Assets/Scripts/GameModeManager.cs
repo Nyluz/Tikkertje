@@ -36,7 +36,7 @@ public class GameModeManager : MonoBehaviour
     [Header("Infection State")]
     public bool roundFinished;
     public int finishedRounds;
-    public bool lastStand;
+    public bool lastman;
     public int nextInfected = 0;
 
     private Coroutine timerRoutine;
@@ -101,9 +101,9 @@ public class GameModeManager : MonoBehaviour
         }
         if (gameMode == GameMode.Infection)
         {
-            if (IsLastManStanding() && !lastStand)
+            if (IsLastManStanding() && !lastman)
             {
-                lastStand = true;
+                lastman = true;
                 playTimeLeft = minuteToSeconds(laststandTime);
 
             }
@@ -137,13 +137,9 @@ public class GameModeManager : MonoBehaviour
 
                 foreach (var player in players)
                 {
-                    if (!player.tagAbility && !lastStand)
+                    if (!player.tagAbility && !lastman)
                     {
                         player.AddRoundScore(30);
-                    }
-                    else if (!player.tagAbility && lastStand)
-                    {
-                        player.AddRoundScore(60);
                     }
                 }
             }
@@ -299,6 +295,7 @@ public class GameModeManager : MonoBehaviour
         roundFinished = false;
         gameTimerFinished = false;
         calculateWinner = false;
+        lastman = false;
 
         nextInfected++;
         if (nextInfected == players.Count)

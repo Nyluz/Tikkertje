@@ -14,6 +14,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DesertMap.unity
     guid: 687a0d57ec23ea044972b0518cf8896b
+  - enabled: 1
+    path: Assets/Scenes/OfficeCenter.unity
+    guid: 47f54f50003099c4c9632386d053caff
+  - enabled: 1
+    path: Assets/Scenes/Warehouse.unity
+    guid: d75ccee89fda41f4f86912c6bc95a2ca
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
   m_UseUCBPForAssetBundles: 0

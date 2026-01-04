@@ -483,7 +483,7 @@ namespace StarterAssets
         private void GroundedCheck()
         {
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-            GroundLayers = ~LayerMask.GetMask("Player" + (playerInput.playerIndex + 1));
+            GroundLayers = ~LayerMask.GetMask("Player" + (playerInput.playerIndex + 1), "PlayerCollider");
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
         }
 
@@ -522,7 +522,6 @@ namespace StarterAssets
 
         public void Respawn()
         {
-            print("Respawn");
             GameManager.Instance.Spawn(playerInput, controller);
         }
     }
