@@ -7,7 +7,8 @@ using UnityEngine;
 public enum GameMode
 {
     Tag,
-    Infection
+    Infection,
+    Bomb
 }
 
 public class GameModeManager : MonoBehaviour
@@ -15,16 +16,24 @@ public class GameModeManager : MonoBehaviour
     public static GameModeManager Instance;
     public GameMode gameMode;
 
+    [Header("General config")]
+    public int rounds = 3;
+    public int roundDuration = 3;
+
     [Header("Tag Config")]
     public int tagTime = 10;
     public int tagLives = 10;
 
     [Header("Infection config")]
-    public int rounds = 3;
-    public int roundDuration = 3;
     public int laststandTime = 1;
 
+    [Header("Bomb")]
+    public int fuseTime = 1;
+    public int bombLives = 5;
+
     [Header("General State")]
+    public bool roundFinished;
+    public int finishedRounds;
     public float playTimeLeft;
     public bool gameStarted;
     public bool gameTimerFinished;
@@ -34,8 +43,6 @@ public class GameModeManager : MonoBehaviour
     public int[] roundWinningPlayers;
 
     [Header("Infection State")]
-    public bool roundFinished;
-    public int finishedRounds;
     public bool lastman;
     public int nextInfected = 0;
 
@@ -67,6 +74,15 @@ public class GameModeManager : MonoBehaviour
             rounds = GameSettings.Instance.rounds;
             roundDuration = GameSettings.Instance.roundDuration;
             laststandTime = GameSettings.Instance.laststandTime;
+
+            fuseTime = GameSettings.Instance.fuseTime;
+            bombLives = GameSettings.Instance.bombLives;
+
+            if (gameMode == GameMode.Bomb)
+            {
+                tagTime = 3;
+                rounds = GameSettings.Instance.bombRounds;
+            }
         }
     }
     public void StartGame()
@@ -77,8 +93,11 @@ public class GameModeManager : MonoBehaviour
 
         StartTimer();
 
-        // Give first player
-        players[nextInfected].GainTagAbility(gameMode);
+        if (gameMode == GameMode.Tag || gameMode == GameMode.Infection)
+        {
+            // Give first player tag ability
+            players[nextInfected].GainTagAbility(gameMode);
+        }
     }
 
     void Update()
@@ -88,6 +107,7 @@ public class GameModeManager : MonoBehaviour
 
         sortedPlayers = players.OrderByDescending(p => p.score).ToList();
 
+        // TAG GAME MODE
         if (gameMode == GameMode.Tag)
         {
             foreach (Player player in players)
@@ -99,6 +119,7 @@ public class GameModeManager : MonoBehaviour
                 }
             }
         }
+        // INFECTION GAME MODE
         if (gameMode == GameMode.Infection)
         {
             if (IsLastManStanding() && !lastman)
@@ -126,7 +147,6 @@ public class GameModeManager : MonoBehaviour
                 else
                     CalculateRoundWinner();
             }
-
             // When timer has ended
             if (gameTimerFinished && !roundFinished)
             {
@@ -144,12 +164,50 @@ public class GameModeManager : MonoBehaviour
                 }
             }
         }
+        // BOMB GAME MODE
+        if (gameMode == GameMode.Bomb)
+        {
+            // When fuse timer has ended
+            if (gameTimerFinished && !roundFinished)
+            {
+                roundFinished = true;
+                finishedRounds++;
+                foreach (var player in players)
+                {
+                    if (player.hasBomb)
+                    {
+                        GameManager.Instance.players[player.index].GetComponent<BombScript>().Explode();
+                        player.ReduceScore(1);
+                        player.LoseBomb();
+                    }
+                }
 
+                foreach (var player in players)
+                {
+                    player.AddRoundScore();
+                }
+
+                if (finishedRounds == rounds)
+                    CalculateGameWinner();
+                else
+                    CalculateRoundWinner();
+            }
+        }
+
+        // Cleanup
         if (roundFinished)
+        {
             foreach (var player in players)
             {
                 player.tagAbility = false;
             }
+        }
+    }
+
+    public void ObtainBomb(int playerIndex)
+    {
+        playTimeLeft += 10;
+        players[playerIndex].GainBomb();
     }
 
     public void CalculateGameWinner()
@@ -174,7 +232,10 @@ public class GameModeManager : MonoBehaviour
 
     private bool IsLastManStanding()
     {
-        return players.Count(p => !p.tagAbility) == 1;
+        if (gameMode == GameMode.Infection)
+            return players.Count(p => !p.tagAbility) == 1;
+        else
+            return false;
     }
 
     private Player GetLastManStanding()
@@ -240,6 +301,11 @@ public class GameModeManager : MonoBehaviour
 
             players[targetPlayerIndex].GainTagAbility(gameMode);
         }
+        if (gameMode == GameMode.Bomb)
+        {
+            ObtainBomb(targetPlayerIndex);
+            players[playerIndex].LoseBomb();
+        }
     }
 
     public void ShowScoreBoard()
@@ -304,7 +370,7 @@ public class GameModeManager : MonoBehaviour
         SceneSwitcher.LoadScene(GameSettings.Instance.map);
     }
 
-    public int minuteToSeconds(int minute)
+    public static int minuteToSeconds(int minute)
     {
         return minute * 60;
     }
@@ -351,6 +417,7 @@ public class Player
     public bool lastman;
     public bool infected;
     public bool tagger;
+    public bool hasBomb;
 
     public Player(int index)
     {
@@ -361,6 +428,10 @@ public class Player
             if (GameSettings.Instance.gameMode == GameMode.Tag)
             {
                 score = GameModeManager.Instance.tagLives;
+            }
+            if (GameSettings.Instance.gameMode == GameMode.Bomb)
+            {
+                score = GameModeManager.Instance.bombLives;
             }
         }
         else
@@ -392,6 +463,9 @@ public class Player
         if (gameMode == GameMode.Infection)
             infected = true;
 
+        if (gameMode == GameMode.Bomb)
+            hasBomb = true;
+
         GameModeManager.Instance.ChangeToColor(index, true);
     }
 
@@ -405,18 +479,31 @@ public class Player
         GameModeManager.Instance.ChangeToColor(index, false);
     }
 
+    public void GainBomb()
+    {
+        hasBomb = true;
+        GainTagAbility(GameMode.Bomb);
+    }
+
+    public void LoseBomb()
+    {
+        hasBomb = false;
+        LoseTagAbility(GameMode.Bomb);
+    }
+
     public void ResetStats()
     {
         tagAbility = false;
         infected = false;
         tagger = false;
         lastman = false;
+        hasBomb = false;
         roundScore = 0;
     }
 
     public void AddRoundScore()
     {
-        score += roundScore;
+        AddScore(roundScore);
     }
 
 }

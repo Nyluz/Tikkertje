@@ -12,6 +12,8 @@ TagManager:
   - Player3
   - Player4
   - AimAssist
+  - FxTemporaire
+  - Bomb
   layers:
   - Default
   - TransparentFX

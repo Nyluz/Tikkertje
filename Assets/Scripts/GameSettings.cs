@@ -18,6 +18,11 @@ public class GameSettings : MonoBehaviour
     public int roundDuration;
     public int laststandTime;
 
+    [Header("Bomb Settings")]
+    public int fuseTime;
+    public int bombLives;
+    public int bombRounds;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

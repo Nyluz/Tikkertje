@@ -121,6 +121,12 @@ public class RagdollScript : MonoBehaviour
         state = State.Ragdoll;
     }
 
+    public void TriggerRagdollBomb()
+    {
+        EnableRagdoll();
+        state = State.Ragdoll;
+    }
+
     private void DisableRagdoll()
     {
         foreach (var rigidbody in ragdollRigidbodies)

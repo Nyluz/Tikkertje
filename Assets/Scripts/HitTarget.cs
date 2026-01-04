@@ -75,6 +75,7 @@ public class HitTarget : MonoBehaviour
                         playerUI.SetCrosshair(handTexture, 128);
                         if (input.slap)
                         {
+                            input.slap = false;
                             RagdollScript ragdoll = controller.GetComponentInChildren<RagdollScript>();
                             Vector3 forceDirection = ragdoll.transform.position - player_camera.transform.position;
                             forceDirection.y = 1;
@@ -86,9 +87,6 @@ public class HitTarget : MonoBehaviour
                             ragdoll.TriggerRagdoll(force, hitInfo.point);
 
                             SoundManager.PlaySound(transform, "event:/Slap");
-
-
-
                             GameModeManager.Instance.SlapAction(playerInput.playerIndex, targetPlayerIndex);
                         }
                         return;
@@ -97,6 +95,32 @@ public class HitTarget : MonoBehaviour
             }
         }
 
-        playerUI.SetCrosshair(crosshairTexture, 16);
+        // Bomb game mode
+        if (GameModeManager.Instance.gameMode == GameMode.Bomb)
+        {
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity))
+            {
+                if (hitInfo.collider.gameObject.tag == "Bomb")
+                {
+                    distance = Vector3.Distance(player_camera.transform.position, hitInfo.collider.transform.position);
+                    if (distance < tagDistance)
+                    {
+                        playerUI.SetCrosshair(handTexture, 128);
+
+                        if (input.slap)
+                        {
+                            input.slap = false;
+
+                            GameModeManager.Instance.ObtainBomb(playerInput.playerIndex);
+                            GameModeManager.Instance.playTimeLeft = GameModeManager.minuteToSeconds(GameModeManager.Instance.fuseTime);
+                            SoundManager.PlaySound(transform, "event:/Slap");
+                            hitInfo.collider.gameObject.SetActive(false);
+                        }
+                    }
+                    return;
+                }
+            }
+            playerUI.SetCrosshair(crosshairTexture, 16);
+        }
     }
 }

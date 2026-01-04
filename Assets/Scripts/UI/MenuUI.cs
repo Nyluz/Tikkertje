@@ -24,6 +24,12 @@ public class MenuUI : MonoBehaviour
     public SettingSlider roundDurationSlider;
     public SettingSlider lastmanDurationSlider;
 
+    [Header("Bomb Sliders")]
+    public Transform bombSettingsPanel;
+    public SettingSlider bombLivesSlider;
+    public SettingSlider bombFuseTimeSlider;
+    public SettingSlider bombRoundsSlider;
+
     public Button infectionButton;
 
     [Header("PlayerButtons")]
@@ -46,6 +52,11 @@ public class MenuUI : MonoBehaviour
         roundsSlider.SetValue(8);
         roundDurationSlider.SetValue(3);
         lastmanDurationSlider.SetValue(1);
+
+        // Bomb
+        bombFuseTimeSlider.SetValue(1);
+        bombLivesSlider.SetValue(5);
+        bombRoundsSlider.SetValue(5);
     }
 
     private void Update()
@@ -56,6 +67,7 @@ public class MenuUI : MonoBehaviour
 
         SetTagGameSettings();
         SetInfectionGameSettings();
+        SetBombGameSettings();
 
         SetGameModeSettings();
 
@@ -106,10 +118,18 @@ public class MenuUI : MonoBehaviour
         GameSettings.Instance.laststandTime = lastmanDurationSlider.value;
     }
 
+    public void SetBombGameSettings()
+    {
+        GameSettings.Instance.bombLives = bombLivesSlider.value;
+        GameSettings.Instance.fuseTime = bombFuseTimeSlider.value;
+        GameSettings.Instance.bombRounds = bombRoundsSlider.value;
+    }
+
     public void SetGameModeSettings()
     {
         tagSettingsPanel.gameObject.SetActive(GameSettings.Instance.gameMode == GameMode.Tag);
         infectionSettingsPanel.gameObject.SetActive(GameSettings.Instance.gameMode == GameMode.Infection);
+        bombSettingsPanel.gameObject.SetActive(GameSettings.Instance.gameMode == GameMode.Bomb);
 
         if (GameSettings.Instance.gameMode == GameMode.Tag)
         {

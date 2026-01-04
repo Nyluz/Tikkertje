@@ -76,8 +76,8 @@ namespace StarterAssets
 
             look = lookInput != Vector2.zero;
             move = moveInput != Vector2.zero;
-            jump = jumpAction.WasPressedThisFrame();
-            slap = slapAction.WasPressedThisFrame();
+            jump |= jumpAction.WasPressedThisFrame();
+            slap |= slapAction.WasPressedThisFrame();
             sprint = sprintAction.IsPressed();
             escMenu = escMenuAction.WasPressedThisFrame();
 #endif

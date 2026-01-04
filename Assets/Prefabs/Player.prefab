@@ -419,6 +419,7 @@ GameObject:
   - component: {fileID: 4956003108041822135}
   - component: {fileID: 1821451200627894373}
   - component: {fileID: 12300499932372593}
+  - component: {fileID: 8000243490247901297}
   m_Layer: 9
   m_Name: Player
   m_TagString: Sheep
@@ -454,7 +455,7 @@ CharacterController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1441569583515794488}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: a49e943693d523a458824e11d1ab17d3, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -465,13 +466,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.75
+  m_Height: 1.5
   m_Radius: 0.25
   m_SlopeLimit: 45
-  m_StepOffset: 0.4
-  m_SkinWidth: 0.02
-  m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 1, z: 0}
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.75, z: 0}
 --- !u!135 &4512014416390392650
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -745,6 +746,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AimTargetCollector
   targets: []
+--- !u!114 &8000243490247901297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441569583515794488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e31a709bb2e4c045b7cf6b56b17ef86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BombScript
+  ragdoll: {fileID: 4525542256179426236}
+  explosionRadius: 5
+  explosionForce: 50
+  upwardModifier: 0.5
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  particle: {fileID: 100008, guid: 06736895ea0a4ff408d25e6684dce797, type: 3}
 --- !u!1 &1661833905999394468
 GameObject:
   m_ObjectHideFlags: 0
@@ -5143,6 +5164,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5597086876180785777, guid: 2af16fb3fe5cba74fa23857239fdedf4, type: 3}
   m_PrefabInstance: {fileID: 5912780840283159944}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4525542256179426236 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7837281966205963828, guid: 2af16fb3fe5cba74fa23857239fdedf4, type: 3}
+  m_PrefabInstance: {fileID: 5912780840283159944}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2167277536165191694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a61689c2af92d5e4e8d9df6edd9b10c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Ragdoll
 --- !u!1 &5823201111808666826 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 206673371802620226, guid: 2af16fb3fe5cba74fa23857239fdedf4, type: 3}

@@ -478,7 +478,9 @@ MonoBehaviour:
   MasterBanks:
   - Master
   Banks:
+  - Master.assets
   - PlayerSounds
+  - PlayerSounds.assets
   BanksToLoad: []
   LiveUpdatePort: 9264
   EnableMemoryTracking: 0

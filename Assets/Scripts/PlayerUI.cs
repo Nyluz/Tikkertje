@@ -65,17 +65,17 @@ public class PlayerUI : MonoBehaviour
         }
 
         // Score text
-        if (GameModeManager.Instance.gameMode == GameMode.Tag)
+        if (GameModeManager.Instance.gameMode == GameMode.Tag || GameModeManager.Instance.gameMode == GameMode.Bomb)
         {
             scoreText.text = GameModeManager.Instance.players[playerInput.playerIndex].score.ToString();
             scoreUnitText.text = "Lives";
         }
-
         if (GameModeManager.Instance.gameMode == GameMode.Infection)
         {
             scoreText.text = GameModeManager.Instance.players[playerInput.playerIndex].roundScore.ToString();
             scoreUnitText.text = "Score";
         }
+
 
         // Crosshair only in FPS mode
         if (firstPersonController.mode() == FirstPersonController.Modes.thirdPerson)
